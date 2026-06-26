@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FOS Visit Tracker — South Gujarat</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue:    #2563EB;
+    --blue-d:  #1d4ed8;
+    --blue-l:  #EFF6FF;
+    --green:   #16a34a;
+    --green-l: #f0fdf4;
+    --red:     #dc2626;
+    --gray-50: #f9fafb;
+    --gray-100:#f3f4f6;
+    --gray-200:#e5e7eb;
+    --gray-300:#d1d5db;
+    --gray-400:#9ca3af;
+    --gray-600:#4b5563;
+    --gray-700:#374151;
+    --gray-800:#1f2937;
+    --radius:  14px;
+    --t: .16s cubic-bezier(.4,0,.2,1);
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: linear-gradient(150deg, #0f2851 0%, #1d4ed8 55%, #0284c7 100%);
+    min-height: 100vh;
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 24px 16px 40px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 32px 80px rgba(0,0,0,.28);
+    width: 100%; max-width: 460px;
+    overflow: hidden;
+  }
+
+  /* ── HEADER ── */
+  .hdr {
+    background: linear-gradient(135deg, #0f2851, #1d4ed8);
+    padding: 26px 28px 22px;
+    color: #fff;
+  }
+  .hdr-row { display: flex; align-items: center; gap: 14px; }
+  .hdr-icon {
+    width: 46px; height: 46px; border-radius: 13px;
+    background: rgba(255,255,255,.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .hdr h1 { font-size: 19px; font-weight: 800; letter-spacing: -.3px; }
+  .hdr p  { font-size: 12px; color: rgba(255,255,255,.65); margin-top: 2px; }
+
+  /* progress bar */
+  .progress { display: flex; gap: 5px; margin-top: 18px; }
+  .p-seg {
+    flex: 1; height: 3px; border-radius: 99px;
+    background: rgba(255,255,255,.2);
+    transition: background .3s;
+  }
+  .p-seg.done   { background: #fff; }
+  .p-seg.active { background: rgba(255,255,255,.6); }
+
+  /* ── BODY ── */
+  .body { padding: 22px 24px 26px; }
+
+  /* step label */
+  .step-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10.5px; font-weight: 700; letter-spacing: .07em;
+    text-transform: uppercase; color: var(--blue);
+    background: var(--blue-l); border-radius: 6px;
+    padding: 3px 8px; margin-bottom: 10px;
+  }
+
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block; font-size: 13px; font-weight: 600;
+    color: var(--gray-700); margin-bottom: 5px;
+  }
+  .req { color: var(--red); }
+
+  /* inputs & selects */
+  select, input[type=text] {
+    width: 100%; padding: 11px 14px;
+    border: 1.5px solid var(--gray-200); border-radius: 11px;
+    font-family: inherit; font-size: 14px; color: var(--gray-800);
+    background: var(--gray-50);
+    appearance: none; -webkit-appearance: none;
+    outline: none;
+    transition: border-color var(--t), box-shadow var(--t), background var(--t);
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%236b7280' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 13px center;
+    padding-right: 36px; cursor: pointer;
+  }
+  select:focus, input:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+    background: #fff;
+  }
+  select:disabled { opacity: .45; cursor: not-allowed; background-color: var(--gray-100); }
+
+  /* auto-filled display box */
+  .auto-box {
+    display: flex; align-items: center; gap: 9px;
+    background: var(--blue-l); border: 1.5px solid #bfdbfe;
+    border-radius: 11px; padding: 10px 14px;
+    font-size: 13.5px; font-weight: 600; color: #1e40af;
+  }
+  .auto-box .ico { font-size: 17px; flex-shrink: 0; }
+
+  /* dealer code badge */
+  .code-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #fefce8; border: 1.5px solid #fde047;
+    border-radius: 8px; padding: 7px 12px;
+    font-size: 13px; font-weight: 700; color: #713f12;
+    margin-top: 8px; letter-spacing: .04em;
+  }
+
+  /* divider */
+  hr { border: none; border-top: 1.5px solid var(--gray-100); margin: 18px 0; }
+
+  /* image upload */
+  .upload-zone {
+    border: 2px dashed var(--gray-300); border-radius: 12px;
+    padding: 22px 14px; text-align: center;
+    cursor: pointer; background: var(--gray-50);
+    transition: all var(--t); position: relative;
+  }
+  .upload-zone:hover, .upload-zone.drag {
+    border-color: var(--blue); background: var(--blue-l);
+  }
+  .upload-zone input {
+    position: absolute; inset: 0; opacity: 0;
+    cursor: pointer; width: 100%; height: 100%;
+  }
+  .upload-zone .u-icon { font-size: 28px; margin-bottom: 6px; }
+  .upload-zone .u-title { font-size: 13.5px; font-weight: 600; color: var(--gray-700); }
+  .upload-zone .u-sub   { font-size: 11.5px; color: var(--gray-400); margin-top: 2px; }
+
+  .preview-wrap { position: relative; border-radius: 12px; overflow: hidden; margin-top: 0; }
+  .preview-wrap img { width: 100%; max-height: 190px; object-fit: cover; display: block; }
+  .rm-btn {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(0,0,0,.5); color: #fff;
+    border: none; border-radius: 50%; width: 28px; height: 28px;
+    font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background var(--t);
+  }
+  .rm-btn:hover { background: var(--red); }
+
+  /* submit btn */
+  .btn-submit {
+    width: 100%; padding: 14px;
+    background: linear-gradient(135deg, #1d4ed8, #0284c7);
+    color: #fff; font-family: inherit; font-size: 15px; font-weight: 700;
+    border: none; border-radius: 12px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: opacity var(--t), transform var(--t), box-shadow var(--t);
+    box-shadow: 0 4px 14px rgba(29,78,216,.35);
+    margin-top: 4px;
+  }
+  .btn-submit:hover:not(:disabled) {
+    opacity: .93; transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(29,78,216,.4);
+  }
+  .btn-submit:active:not(:disabled) { transform: translateY(0); }
+  .btn-submit:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .hint {
+    text-align: center; font-size: 11.5px;
+    color: var(--gray-400); margin-top: 9px;
+  }
+
+  /* spinner */
+  .spinner {
+    width: 17px; height: 17px;
+    border: 2.5px solid rgba(255,255,255,.35);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin .65s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* toast */
+  .toast {
+    position: fixed; top: 18px; left: 50%;
+    transform: translateX(-50%) translateY(-90px);
+    padding: 12px 20px; border-radius: 10px;
+    font-size: 13.5px; font-weight: 600; color: #fff;
+    box-shadow: 0 8px 28px rgba(0,0,0,.2);
+    transition: transform .32s cubic-bezier(.34,1.56,.64,1);
+    z-index: 9999; white-space: nowrap; max-width: 92vw;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.ok  { background: var(--green); }
+  .toast.err { background: var(--red); }
+
+  /* success screen */
+  .success {
+    display: none; flex-direction: column;
+    align-items: center; text-align: center;
+    padding: 38px 24px 32px;
+  }
+  .success.on { display: flex; }
+  .sc-ring {
+    width: 78px; height: 78px; border-radius: 50%;
+    background: var(--green-l); border: 3px solid #86efac;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 34px; margin-bottom: 18px;
+    animation: pop .4s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes pop { from { transform: scale(0); opacity: 0; } }
+  .success h2 { font-size: 21px; font-weight: 800; color: var(--gray-800); }
+  .success p  { font-size: 13px; color: var(--gray-600); margin-top: 5px; line-height: 1.6; }
+
+  .sc-table {
+    width: 100%; background: var(--gray-50);
+    border: 1.5px solid var(--gray-200); border-radius: 12px;
+    padding: 4px 14px; margin-top: 18px; text-align: left;
+  }
+  .sc-row {
+    display: flex; justify-content: space-between;
+    align-items: center; padding: 8px 0;
+    border-bottom: 1px solid var(--gray-100); font-size: 13px;
+  }
+  .sc-row:last-child { border-bottom: none; }
+  .sc-row .k { color: var(--gray-400); font-weight: 500; white-space: nowrap; padding-right: 10px; }
+  .sc-row .v {
+    color: var(--gray-800); font-weight: 600;
+    text-align: right; word-break: break-word; max-width: 65%;
+  }
+  .sc-row .v.code {
+    font-family: 'Courier New', monospace;
+    background: #fefce8; border: 1px solid #fde047;
+    border-radius: 5px; padding: 2px 7px; color: #713f12;
+  }
+
+  .btn-again {
+    margin-top: 20px; padding: 11px 26px;
+    background: var(--blue-l); color: var(--blue);
+    border: 2px solid #bfdbfe; border-radius: 11px;
+    font-family: inherit; font-size: 13.5px; font-weight: 700;
+    cursor: pointer; transition: all var(--t);
+  }
+  .btn-again:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+
+  <!-- SUCCESS -->
+  <div class="success" id="scr">
+    <div class="sc-ring">✅</div>
+    <h2>Visit Logged!</h2>
+    <p>Saved to Google Sheet &amp;<br/>photo uploaded to Drive.</p>
+    <div class="sc-table" id="scTable"></div>
+    <button class="btn-again" onclick="resetForm()">＋ Log Another Visit</button>
+  </div>
+
+  <!-- FORM -->
+  <div id="frmWrap">
+
+    <div class="hdr">
+      <div class="hdr-row">
+        <div class="hdr-icon">🏪</div>
+        <div>
+          <h1>FOS Visit Tracker</h1>
+          <p>Log your outlet visit in seconds</p>
+        </div>
+      </div>
+      <div class="progress">
+        <div class="p-seg active" id="ps1"></div>
+        <div class="p-seg" id="ps2"></div>
+        <div class="p-seg" id="ps3"></div>
+        <div class="p-seg" id="ps4"></div>
+      </div>
+    </div>
+
+    <div class="body">
+
+      <!-- STEP 1 — Salesman -->
+      <div class="step-tag">Step 1 · Who are you?</div>
+      <div class="field">
+        <label>Salesman Name <span class="req">*</span></label>
+        <select id="selSales" onchange="onSalesChange()">
+          <option value="">— Select your name —</option>
+        </select>
+      </div>
+
+      <hr/>
+
+      <!-- STEP 2 — BM -->
+      <div class="step-tag">Step 2 · Business Manager</div>
+      <div class="field">
+        <label>BM Name <span class="req">*</span></label>
+        <div id="bmBox" class="auto-box" style="display:none">
+          <span class="ico">👔</span>
+          <span id="bmName">—</span>
+        </div>
+        <select id="selBM" style="display:none" onchange="onBMChange()">
+          <option value="">— Select BM —</option>
+        </select>
+        <div id="bmPlaceholder" style="padding:11px 14px;border:1.5px solid var(--gray-200);border-radius:11px;background:var(--gray-100);font-size:13px;color:var(--gray-400);">
+          Auto-filled after selecting dealer
+        </div>
+      </div>
+
+      <hr/>
+
+      <!-- STEP 3 — Dealer -->
+      <div class="step-tag">Step 3 · Select Dealer</div>
+      <div class="field">
+        <label>Dealer Name <span class="req">*</span></label>
+        <select id="selDealer" onchange="onDealerChange()" disabled>
+          <option value="">— Select dealer —</option>
+        </select>
+      </div>
+
+      <!-- Dealer Code display (shown after dealer selected) -->
+      <div id="codeWrap" style="display:none; margin-top:-8px; margin-bottom:16px;">
+        <div class="code-badge">🏷️ Dealer Code: <span id="showCode">—</span></div>
+      </div>
+
+      <hr/>
+
+      <!-- STEP 4 — Photo -->
+      <div class="step-tag">Step 4 · Outlet Photo</div>
+      <div class="field" style="margin-bottom:0">
+        <label>Upload Visit Photo <span class="req">*</span></label>
+        <div class="upload-zone" id="uZone">
+          <input type="file" id="imgInput" accept="image/*" capture="environment" onchange="onImg(event)"/>
+          <div class="u-icon">📷</div>
+          <div class="u-title">Tap to take photo or pick from gallery</div>
+          <div class="u-sub">JPG · PNG · WEBP &nbsp;·&nbsp; Max 10MB</div>
+        </div>
+        <div class="preview-wrap" id="prevWrap" style="display:none">
+          <img id="imgPrev" src="" alt=""/>
+          <button class="rm-btn" onclick="removeImg()" title="Remove">✕</button>
+        </div>
+      </div>
+
+      <hr/>
+
+      <button class="btn-submit" id="btnSub" onclick="submitForm()" disabled>
+        <span id="btnTxt">Submit Visit</span>
+        <span id="btnSpin" style="display:none" class="spinner"></span>
+      </button>
+      <p class="hint" id="hint">Complete all steps above to submit</p>
+
+    </div>
+  </div><!-- /frmWrap -->
+</div><!-- /card -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  ⚙️  PASTE YOUR APPS SCRIPT URL HERE
+// ═══════════════════════════════════════════════════════
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz99BS9_rytu9CrfYx_hdPS-eQjWS1TCsNv2w_TXj5SjLIqzzikr5p1KjWveeT5VOQobA/exec';
+
+// ═══════════════════════════════════════════════════════
+//  📋  YOUR BASE DATA — Add all salesmen, BMs & dealers
+//
+//  STRUCTURE:
+//  "Salesman Name": {
+//    bm: "BM Name",           ← This BM auto-fills when salesman selected
+//    dealers: [
+//      { name: "Shop Name", code: "UNIQUE-CODE", address: "Address" },
+//    ]
+//  },
+// ═══════════════════════════════════════════════════════
+const DATA = {
+  "ANIL MALI": {
+    dealers: [
+      { name: "Amar Mobile  Electronics_Pandesara_Surat", code: "IN020468", bm: "JAY DABGAR", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_BAMROLI_SURAT_GUJARAT", code: "501004794", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_PANDESARA PIYUSH POINT 2_SURAT_GUJARAT", code: "501004777", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_PANDESARA_SURAT_GUJARAT", code: "501004811", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COMMUNICATIONS & RETAIL (INDIA) LIMITED_PATRAKAR COLONY_SURAT", code: "IN027304", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COMMUNICATIONS & RETAIL (INDIA) LIMITED_SADAT SHOPPING CENTER_SURAT", code: "IN119026", bm: "DHAVAL MALI", address: "" },
+      { name: "Bhatia Communications & Retail (India) Limited_ Welcome Circle_Surat", code: "IN017819", bm: "DHAVAL MALI", address: "" },
+      { name: "Bhatia Communications And Retails (India) Limited_Bamroli", code: "IN004682", bm: "DHAVAL MALI", address: "" },
+      { name: "Bhatia Mobile_Vadod Gam_Surat", code: "IN025006", bm: "DHAVAL MALI", address: "" },
+      { name: "FONEBOX RETAIL PVT LTD (A UNIT OF PHONEWALE)_PANDESRA_SURAT", code: "IN114622", bm: "JAY DABGAR", address: "" },
+      { name: "Fonebook Retail Limited_Pandesara 2_Surat", code: "IN013438", bm: "JAY DABGAR", address: "" },
+      { name: "Fonebox Retails Pvt Ltd_Bamroli Road_Surat", code: "IN034791", bm: "JAY DABGAR", address: "" },
+      { name: "GOODLUCK MOBILE_UDHNA_PANDESARA_SURAT_GUJARAT", code: "501005303", bm: "JAY DABGAR", address: "" },
+      { name: "Gujarat Mobile_Pandesara_Surat", code: "IN037788", bm: "JAY DABGAR", address: "" },
+      { name: "Gujarat Mobile_Piyush Point_Surat", code: "IN012703", bm: "JAY DABGAR", address: "" },
+      { name: "Gujarat_Jay Hinglaj Mobile Store_MS", code: "IN017773", bm: "JAY DABGAR", address: "" },
+      { name: "JAY HINGLAJ MOBILE AND ELECTRONICS_PANDESARA_SURAT", code: "501000479", bm: "JAY DABGAR", address: "" },
+      { name: "Jay Hinglaj Mobile And Electronics_Bamroli_Surat", code: "IN025822", bm: "JAY DABGAR", address: "" },
+      { name: "Jay Hinglaj Mobile Store_Terenam Chokdi", code: "501000486", bm: "JAY DABGAR", address: "" },
+      { name: "Jay Hinglaj Mobile_Sachin_Surat", code: "IN033479", bm: "JAY DABGAR", address: "" },
+      { name: "KRISHNA MOBILE CARE_PANDESARA_SURAT_GUJARAT", code: "501005140", bm: "JAY DABGAR", address: "" },
+      { name: "Mehta Retail Pvt Ltd_Pandesara_Surat", code: "IN035904", bm: "JAY DABGAR", address: "" },
+      { name: "Mobile Ghar (Bhatia Com And Retail Ind Pvt Ltd)_Pandesara_Surat", code: "IN037209", bm: "DHAVAL MALI", address: "" },
+      { name: "My Mobile (Unit Of Fonebox Retil Ltd)_Pandesara_Surat", code: "IN009873", bm: "JAY DABGAR", address: "" },
+      { name: "PHONE WALE_PIYUSH POINT_PANDESARA_GUJARAT", code: "IN110298", bm: "JAY DABGAR", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_SHOP NO.43_BHESTAN (BM)", code: "IN123635", bm: "DHAVAL MALI", address: "" },
+      { name: "Poojara Telecom Pvt Ltd_Bhestan_Surat", code: "IN028075", bm: "DHAVAL MALI", address: "" },
+      { name: "Poojara Telecom Pvt Ltd_Chikuwadi Pandesara_Surat", code: "IN027615", bm: "DHAVAL MALI", address: "" },
+      { name: "Poojara Telecom Pvt Ltd_Ganesh Nagar_Surat", code: "IN012116", bm: "DHAVAL MALI", address: "" },
+      { name: "Poojara Telecom Pvt Ltd_Pandesara", code: "IN005339", bm: "DHAVAL MALI", address: "" },
+      { name: "Ramdev Mobile_Bhestan_Surat", code: "IN038901", bm: "DHAVAL MALI", address: "" },
+      { name: "SHREE KRISHNA MOBILE_PANDESARA_SURAT_GUJARAT", code: "501003815", bm: "JAY DABGAR", address: "" },
+      { name: "SUNDHA MOBILE_PANDESARA_SURAT_GUJARAT", code: "501005341", bm: "JAY DABGAR", address: "" },
+      { name: "Shree Krishna Mobile_Pandesara_Surat", code: "IN026477", bm: "JAY DABGAR", address: "" },
+      { name: "VIHAN COMMUNICATION_10/11 GOPAL NAGAR_SURAT_GUJARAT", code: "501004955", bm: "JAY DABGAR", address: "" },
+      { name: "VIHAN COMMUNICATION_13/14 GOPAL NAGAR_SURAT_GUJARAT", code: "501004949", bm: "JAY DABGAR", address: "" },
+      { name: "VIHAN COMMUNICATION_8/9 GOPAL NAGAR_SURAT_GUJARAT", code: "501004951", bm: "JAY DABGAR", address: "" },
+      { name: "VIHAN COMMUNICATION_BHESTAN_SURAT_GUJARAT", code: "501004957", bm: "JAY DABGAR", address: "" },
+      { name: "VINIT MOBILE PVT LTD_GOPAL NAGAR_SURAT_GUJARAT", code: "501001755", bm: "JAY DABGAR", address: "" },
+      { name: "VINIT MOBILE_GANESH NAGAR_PANDESRA_SURAT", code: "IN125649", bm: "JAY DABGAR", address: "" },
+      { name: "VINIT MOBILE_GANESH NAGAR_SURAT", code: "IN114592", bm: "JAY DABGAR", address: "" },
+      { name: "VINIT MOBILE_GEETA NAGAR_SURAT", code: "IN115478", bm: "JAY DABGAR", address: "" },
+      { name: "VINIT MOBILE_ICICI BANK_SAYAN_SURAT", code: "IN125738", bm: "VINOD PATEL", address: "" },
+      { name: "VINIT MOBILE_KADODRA_SURAT", code: "IN116413", bm: "VINOD PATEL", address: "" },
+      { name: "VINIT MOBILE_KAMU MAHADEV NAGAR_SURAT", code: "IN032079", bm: "JAY DABGAR", address: "" },
+      { name: "VINIT MOBILE_PANDESARA_SURAT_GUJARAT", code: "501001745", bm: "JAY DABGAR", address: "" },
+      { name: "VINIT MOBILE_SACHIN_SURAT_GUJARAT", code: "501001757", bm: "JAY DABGAR", address: "" },
+      { name: "VINIT MOBILE_SUDA-1_SURAT", code: "IN121451", bm: "JAY DABGAR", address: "" },
+      { name: "VINIT MOBILE_SUDA-2_SURAT", code: "IN121452", bm: "JAY DABGAR", address: "" },
+      { name: "VINIT MOBILE_SURAT_GUJARAT", code: "501001749", bm: "JAY DABGAR", address: "" },
+      { name: "VR Mobile (Unit Of Vinit Mobile Limited)_Gopal Nagar_Surat", code: "IN025821", bm: "JAY DABGAR", address: "" },
+      { name: "VR Mobile (Unit Of Vinit Mobile Pvt Ltd)_Sachin_Surat", code: "IN026260", bm: "JAY DABGAR", address: "" },
+      { name: "VR Mobile_Ashirwad Nagar_Surat", code: "IN024437", bm: "JAY DABGAR", address: "" },
+      { name: "VR Mobile_Ganesh Nagar_Surat", code: "IN027520", bm: "JAY DABGAR", address: "" },
+      { name: "VR Mobile_Hamza Complex_Surat", code: "IN025380", bm: "JAY DABGAR", address: "" },
+      { name: "Vihan Communication_Udhna_Surat", code: "IN021134", bm: "JAY DABGAR", address: "" },
+      { name: "Vinit Mobile Pvt Ltd (Vinayak Nagar)_Pandesara_Surat", code: "IN014999", bm: "JAY DABGAR", address: "" },
+      { name: "Vinit Mobile Pvt Ltd _Patrakar Colony_Surat", code: "IN013127", bm: "JAY DABGAR", address: "" },
+      { name: "Vinit Mobile Pvt Ltd_Near D-Mart_Surat", code: "IN034790", bm: "JAY DABGAR", address: "" },
+      { name: "Vinit Mobile Pvt Ltd_Terenaam Road_Surat", code: "IN037669", bm: "JAY DABGAR", address: "" },
+      { name: "Vinit Mobile_Mahavir Society_Surat_Gujarat", code: "IN008781", bm: "JAY DABGAR", address: "" },
+      { name: "Vinit Mobile_Parab V18_Surat", code: "IN022740", bm: "VINOD PATEL", address: "" },
+      { name: "Vinit Mobile_Sachin", code: "IN005680", bm: "JAY DABGAR", address: "" },
+      { name: "Vinit Mobile_V17 Krishna Nagar _Surat", code: "IN010963", bm: "VINOD PATEL", address: "" },
+      { name: "Vr Mobile (Unit Of Vinit Mobile)_Pandesara_Surat", code: "IN017994", bm: "JAY DABGAR", address: "" },
+      { name: "Your Mobile (Unit Of Gujrat Mobile)_Pandesara 2_Surat", code: "IN019086", bm: "JAY DABGAR", address: "" },
+    ]
+  },
+  "ANKIT GANDHI": {
+    dealers: [
+      { name: "A ONE MOBILE_LH ROAD_SURAT_GUJARAT", code: "501004327", bm: "DHAVAL MALI", address: "" },
+      { name: "A ONE MOBILE_SUDAMA CHOWK_MOTA VARACHA_SURAT", code: "IN107387", bm: "DHAVAL MALI", address: "" },
+      { name: "A One Mobile_Amaroli_Surat", code: "IN034433", bm: "DHAVAL MALI", address: "" },
+      { name: "A-ONE MOBILE_PUNAGAM_SURAT", code: "IN122724", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM & RETAIL IND PVT LTD_VARACHHA_SURAT", code: "IN125155", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_AVADH SARTHANA_SURAT_GUJARAT", code: "501003755", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_PODDAR_242_SURAT_GUJARAT", code: "501003743", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_PODDAR_322_SURAT_GUJARAT", code: "501004814", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_YOGI CHOWK_SURAT_GUJARAT", code: "501004832", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COMMUNICATIONS & RETAIL (INDIA) LIMITED_ABHRAMA ROAD_SURAT", code: "IN030182", bm: "DHAVAL MALI", address: "" },
+      { name: "Bhatia Com And Retail Ind Pvt Ltd_Minibazar_Surat", code: "IN030055", bm: "DHAVAL MALI", address: "" },
+      { name: "Fone Plus (Unit Of Gujarat Mobile)_Varachha  Road_Surat", code: "IN037347", bm: "JAY DABGAR", address: "" },
+      { name: "Fonebox Retail Pvt Ltd (A Unit Of Phonewale)_Avadh Branch", code: "501004733", bm: "JAY DABGAR", address: "" },
+      { name: "Fonebox Retail Pvt Ltd (A Unit Of Phonewale)_Poddar Market", code: "501004735", bm: "JAY DABGAR", address: "" },
+      { name: "Fonebox Retail Pvt Ltd (A Unit Of Phonewale)_Yogi Chowk", code: "501004725", bm: "JAY DABGAR", address: "" },
+      { name: "GUJRAT MOBILE WORLD_SARTHANA_SURAT_GUJARAT", code: "501004353", bm: "JAY DABGAR", address: "" },
+      { name: "GUJRAT MOBILE WORLD_SUDAMA CHOWK_SURAT_GUJARAT", code: "501004340", bm: "JAY DABGAR", address: "" },
+      { name: "GUJRAT MOBILE WORLD_YOGICHOWK 2_SURAT_GUJARAT", code: "IN113304", bm: "JAY DABGAR", address: "" },
+      { name: "Gujarat Mobile World_Varacha", code: "IN003784", bm: "JAY DABGAR", address: "" },
+      { name: "Gujarat Mobile World_Yogi Chowk_Surat", code: "IN018779", bm: "JAY DABGAR", address: "" },
+      { name: "Gujarat Mobile_Matavadi_Surat", code: "IN021608", bm: "JAY DABGAR", address: "" },
+      { name: "Gujrat Mobile World_Varachha Road_Surat", code: "IN025558", bm: "JAY DABGAR", address: "" },
+      { name: "Gujrat Mobile World_Yogi Chowk", code: "501004351", bm: "JAY DABGAR", address: "" },
+      { name: "Gujrat Mobile_Sarthana Jakat Naka_Surat", code: "IN038445", bm: "JAY DABGAR", address: "" },
+      { name: "KISSTEL SALES AND SERVICE_AK ROAD_SURAT_GUJARAT", code: "501006318", bm: "DHAVAL MALI", address: "" },
+      { name: "ONE MOBILE_ISHWARKRUPA_SURAT_GUJARAT", code: "501004321", bm: "DHAVAL MALI", address: "" },
+      { name: "ONE MOBILE_YOGI CHOWK_SURAT_GUJARAT", code: "501004328", bm: "DHAVAL MALI", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_YOGI CHOWK_SURAT_GUJARAT", code: "501008828", bm: "DHAVAL MALI", address: "" },
+      { name: "Phonewale Limited_Varachha_Surat", code: "IN037358", bm: "JAY DABGAR", address: "" },
+      { name: "Poojara Telecom Pvt Ltd_Sudama Chowk_Surat", code: "IN119238", bm: "DHAVAL MALI", address: "" },
+      { name: "Ramdev Mobile_Mota Varachha_Surat", code: "IN035133", bm: "DHAVAL MALI", address: "" },
+      { name: "Ramdev Mobile_Yogi Chowk_Surat", code: "IN032230", bm: "DHAVAL MALI", address: "" },
+      { name: "Rediphone (Unit Of  Poojara Telecom Pvt Ltd) (BM)_Mota Varachha_Surat", code: "IN028004", bm: "DHAVAL MALI", address: "" },
+      { name: "SHIVAM MOBILE CARE (UNIT OF RAMDEV MOBILE)_VALINATH SOCIETY_SURAT", code: "IN035138", bm: "DHAVAL MALI", address: "" },
+      { name: "SHIVAM MOBILE CARE (UNIT OF RAMDEV MOBILE)_YOGI CHOWK_SURAT_GUJARAT", code: "501005058", bm: "DHAVAL MALI", address: "" },
+      { name: "Shivam Mobile Care (Unit Of Ramdev Mobile)_Podar Aarced_Surat", code: "IN036398", bm: "DHAVAL MALI", address: "" },
+      { name: "Shivam Mobile Care (Unit Of Ramdev Mobile)_Varachha_Surat", code: "IN036378", bm: "DHAVAL MALI", address: "" },
+      { name: "UMIYA MOBILE PRIVATE LIMITED_MANGALAM SHOPPING_SURAT", code: "IN023432", bm: "DHAVAL MALI", address: "" },
+      { name: "UMIYA MOBILE PVT LTD_KHAND BAZAR_SURAT", code: "IN110020", bm: "DHAVAL MALI", address: "" },
+      { name: "VARDHMAN MOBILE AND ELECTRONICS_AK ROAD_SURAT_GUJARAT", code: "501004271", bm: "DHAVAL MALI", address: "" },
+    ]
+  },
+  "ANKIT SHARMA": {
+    dealers: [
+      { name: "16175 - PHONEWALE LIMITED_DADRA AND NAGAR HAVELI_SILVASSA", code: "IN118573", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "16178 THAKUR MOBILE AND ELECTRONICS_SILVASSA ROAD_KHANVEL", code: "IN120307", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "25052 POOJARA TELECOM PVT LTD (5G) SILVASSA_GUJARAT", code: "IN104798", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "AAI MATA MOBILE_SURAMGI_SILVASSA_GUJARAT", code: "501000303", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "ADINATH TELECOM_TOKARKHADA_SILVASSA_GUJARAT", code: "501001652", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "BABAJI MOBILE AND ACCESSORIES_NAROLI_SILVASSA_GUJARAT", code: "IN101960", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_LANDMARK_SILVASSA", code: "IN121992", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_SILVASSA_GUJARAT", code: "501004755", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_ZANDA CHOK_SURAT_GUJARAT", code: "IN117068", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "BHATIA COMMUNICATION & RETAIL (INDIA) LTD_HORIZON TOWER_SILVASSA", code: "IN108851", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "BHAVANI MOBILE AND ELECTRONIC_DADRA_SILVASSA_GUJARAT", code: "501001660", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Bhatia Com And Retail Ind Pvt Ltd_Khanvel", code: "IN005675", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Bhatia Com And Retail Ind Pvt Ltd_Rakholi Char Rasta_Silvassa", code: "IN030010", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Bhatia Communication And Retail (India) Ltd_Surangi_Silvassa", code: "IN032497", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "FHONE2FHONE (A UNIT OF JASMIN INFINITE TRADE PVT LTD)_PALI CORNER APT_SILVASSA", code: "IN028538", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Gujarat Mobile_Natwar Apartment_Silvassa", code: "IN033437", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "JAY JALARAM MOBILE SHOP_KHARADPADA_SILVASSA", code: "IN111167", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "MOBILE STATION_TOKARKHADA_SILVASSA", code: "IN121996", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "MY PHONE (UNIT OF UMIYA MOBILE)_RED CROSS BHAVAN_SILVASSA", code: "IN027240", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Mobile Station (Unit Of Bhatia Communications & Retail (India) Limited)_Jalaram Darshan Complex _Silvassa", code: "IN029722", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Mobile Station (Unit Of Bhatia Communications & Retail (India) Limited)_Kilvani Naka_Silvassa", code: "IN029705", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Mobile Station_Union Territory_Khanvel", code: "IN012319", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "N N MOBILE_KILVANI NAKA_SILVASSA_GUJARAT", code: "501001666", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "New S S Watch And Elec  (Unit Of Poojara Telecom Pvt Ltd)_Tokarkhada_Silvassa", code: "501001329", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "New S S Watch And Elec (Unit Of Poojara Telecom Pvt Ltd)_Amli_Silvassa", code: "501001326", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "New S S Watch And Elec (Unit Of Poojara Telecom Pvt Ltd)_Kilvani Naka_Silvassa", code: "501001320", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "PARI MOBILE_KILVANI ROAD_SILVASSA_GUJARAT", code: "501001656", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_LANDMARK_SILVASSA", code: "IN121008", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_SILVASSA ROAD_KHANVEL", code: "IN121887", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_ZANDA CHOK_SILVASSA_GUJARAT", code: "501003262", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Phone Wale_Landmark Business Hub_Silvassa", code: "IN011039", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Phonewale_Jalaram Complex_Silvassa", code: "IN012705", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Radhe Mobile_Demni Road_Silvassa", code: "IN010469", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Rediphone (Unit Of Poojara Telecom Pvt Ltd)_Landmark Business Hub_Silvassa", code: "IN027507", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "S Mohit Electronics_ Rakholi_Silvassa", code: "IN015048", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "SHYAM MOBILE SHOP_KILVANI NAKA_SILVASSA_GUJARAT", code: "IN102827", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "SIDDHARTH ELECTRONICS_NAROLI_SILVASSA_GUJARAT", code: "501001577", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Super Electronics_Jc Tower_Khanvel", code: "IN010229", bm: "HIREN BHANUSHALI", address: "" },
+    ]
+  },
+  "BILLIMORA": {
+    dealers: [
+      { name: "18022 BLUE MOON MOBILE GALLARY(NAV)_COLLEGE ROAD(UNIT OF POOJARA TELECOM PVT LTD)", code: "501002229", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Gujarat Mobile_Tirupati Heights_Billimora", code: "IN023795", bm: "ASHISH DHANGAR", address: "" },
+      { name: "HARI OM MOBILES AND SERVICE CENTER_GOAHRBAUG_BILLIMORA_GUJARAT", code: "501006353", bm: "ASHISH DHANGAR", address: "" },
+      { name: "METRO MOBILE_MORAJI DESAI MARG_BILIMORA", code: "IN117918", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Phonewale Limited_Shnehal Hospital_Bilimora", code: "IN017464", bm: "ASHISH DHANGAR", address: "" },
+      { name: "RAJGURU ELE. AND MOBILE_RAJBHOG_BILLIMORA_GUJARAT", code: "501004923", bm: "ASHISH DHANGAR", address: "" },
+      { name: "SAI MOBILE GALLERY_VANKO MAHALLO_BILLIMORA_GUJARAT", code: "501006356", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Shree Sawariya Mobile_Chikhali Road_Bilimora", code: "IN035196", bm: "ASHISH DHANGAR", address: "" },
+      { name: "YOUR MOBILE (UNIT OF GUJARAT MOBILE)_RISHNA COMPLEX_BILIMORA", code: "IN024193", bm: "ASHISH DHANGAR", address: "" },
+    ]
+  },
+  "CHANDRAKANT BHOYAE": {
+    dealers: [
+      { name: "AMBIKA ELECTRONICS AND MOBILE SHOP_VAPI ROAD_DHARAMPUR_GUJARAT", code: "501003110", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Airron Digital_Ramahel Road_Dharampur", code: "IN033779", bm: "ASHISH DHANGAR", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_DHARAMPUR_VALSAD_GUJARAT", code: "501004764", bm: "ASHISH DHANGAR", address: "" },
+      { name: "BHAVANI MOBILE_TRAN DARVAJA_DHARAMPUR_GUJARAT", code: "501004218", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Bhaita Com And Retail Pvt Ltd_Motapondha", code: "IN005677", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Bhatia Com And Retail Ind Pvt Ltd_Nanapondha_Vapi_Gujarat", code: "501004753", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Foneking_(Unit Of Poojara Telecom Pvt Ltd)_Shop No.2_Dharampur", code: "IN117762", bm: "ASHISH DHANGAR", address: "" },
+      { name: "GANESHAY ELECTRONICS_VALOD FALIYA_DHARAMPUR_GUJARAT", code: "IN100327", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Gujarat Mobile_Hathi Khana_Dharampur", code: "IN025530", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Gujarat Mobile_Keshav Complex_Kaprada", code: "IN037385", bm: "ASHISH DHANGAR", address: "" },
+      { name: "JALARAM MOBILE_LAVJI GALI_DHARAMPUR_GUJARAT", code: "501004185", bm: "ASHISH DHANGAR", address: "" },
+      { name: "KAPDIYA TELECOM_SAAKBHAJI MARKET_DHARAMPUR_GUJARAT", code: "501004111", bm: "ASHISH DHANGAR", address: "" },
+      { name: "KRISHNA MOBILE_LIMDA CHOK_DHARAMPUR_GUJARAT", code: "501004097", bm: "ASHISH DHANGAR", address: "" },
+      { name: "LUCKY MOBILE_HATHIKHANA_DHARAMPUR_GUJARAT", code: "501004196", bm: "ASHISH DHANGAR", address: "" },
+      { name: "NEW M.K. MOBILE_HATHIKHANA_DHARAMPUR_GUJARAT", code: "501004227", bm: "ASHISH DHANGAR", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_MOTA PONDHA_KAPRADA", code: "IN125358", bm: "ASHISH DHANGAR", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_PRABHU STREET_DHARAMPUR", code: "IN119578", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Prince Mobile (Unit Of Poojara Telecom Pvt Ltd (BM))_Hathikhana_Dharampur_Gujarat", code: "501004173", bm: "ASHISH DHANGAR", address: "" },
+      { name: "R P Sales_Nanaponda", code: "IN123311", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Sai Leela Enterprise_Mohangadh_Dharampur", code: "IN021085", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Sanjari Mobile_Vapi Road", code: "501004233", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Sweta Communication_Near Kumar Sala", code: "501004118", bm: "ASHISH DHANGAR", address: "" },
+    ]
+  },
+  "CHETAN PATEL": {
+    dealers: [
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_MANDVI_SURAT_GUJARAT", code: "501004786", bm: "VINOD PATEL", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_VYARA_GUJARAT", code: "501004820", bm: "VINOD PATEL", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_ZANKHVAV_SURAT_GUJARAT", code: "501004747", bm: "VINOD PATEL", address: "" },
+      { name: "BHATIA COMMUNICATION & RETAIL (INDIA) LTD_SARDAR PATEL ROAD_SURAT", code: "IN111547", bm: "VINOD PATEL", address: "" },
+      { name: "BHATIA COMMUNICATIONS & RETAIL (INDIA) LIMITED_MAIN BAZAR_SONGADH", code: "IN032027", bm: "VINOD PATEL", address: "" },
+      { name: "Bhatia Com & Retail Ind Pvt Ltd _Sardar Baug_Bardoli", code: "IN011731", bm: "VINOD PATEL", address: "" },
+      { name: "Bhatia Com And Retail Ind Pvt Ltd_Krishna Mall_Songadh_Surat_Gujarat", code: "IN008551", bm: "VINOD PATEL", address: "" },
+      { name: "Bhatia Com And Retail Ind Pvt Ltd_Kukarmunda", code: "BD100042", bm: "VINOD PATEL", address: "" },
+      { name: "Bhatia Com And Retail Ind Pvt Ltd_Mosali Main Road", code: "IN006992", bm: "VINOD PATEL", address: "" },
+      { name: "Bhatia Communications & Retail (India) Limited_Karcheliya_Surat", code: "IN028932", bm: "VINOD PATEL", address: "" },
+      { name: "Bhatia Communications & Retail (India) Limited_Opp. Geb Main Gate_Songadh", code: "IN030652", bm: "VINOD PATEL", address: "" },
+      { name: "Bhatia Communications & Retail (India) Limited_Uchchhal Shopping Center_Songadh", code: "IN025944", bm: "VINOD PATEL", address: "" },
+      { name: "C D COLLECTION_BANK ROAD_VYARA_GUJARAT", code: "501001425", bm: "VINOD PATEL", address: "" },
+      { name: "Gujarat Mobile_Main Bazar_Vyara", code: "IN036487", bm: "VINOD PATEL", address: "" },
+      { name: "Gujarat Mobile_Old Bus Station_Vyara", code: "IN016245", bm: "VINOD PATEL", address: "" },
+      { name: "Gujarat_Shree Mevad Agency_MS", code: "IN027830", bm: "VINOD PATEL", address: "" },
+      { name: "Jalaram Mobile_Near Vaibhav Cinema_Vyara_Gujarat", code: "501002324", bm: "VINOD PATEL", address: "" },
+      { name: "MOBILE STATION_MAIN BAZAR_ARETH_GUJARAT", code: "501002385", bm: "VINOD PATEL", address: "" },
+      { name: "MOBILE STATION_SURBHI TOWER_VYARA", code: "IN022933", bm: "VINOD PATEL", address: "" },
+      { name: "MOTHER MOBILE AND ELECTRONICS_MAIN BAZAR_VYARA_GUJARAT", code: "501002428", bm: "VINOD PATEL", address: "" },
+      { name: "Mobile Ghar (A Unit Of Bhatia Communication & Retail(India)Limited)_Bank Road_Vyara", code: "IN031132", bm: "VINOD PATEL", address: "" },
+      { name: "Mobile Ghar (Bhatia Com And Retail Ind Pvt Ltd)_Shree Complex_Songadh", code: "IN021619", bm: "VINOD PATEL", address: "" },
+      { name: "Mobile Station (Unit Of Bhatia Communications & Retail (India) Limited)_Main Road_Songadh", code: "IN029674", bm: "VINOD PATEL", address: "" },
+      { name: "Mobile Station (Unit Of Bhatia Communications & Retail )_Kadod_Surat", code: "IN015765", bm: "VINOD PATEL", address: "" },
+      { name: "My Phone (Unit Of Umiya Mobile Limited)_Unai Road_Vyara", code: "IN036600", bm: "VINOD PATEL", address: "" },
+      { name: "OM GIFT GALLERY AND MOBILE_BANK ROAD_VYARA_GUJARAT", code: "501002395", bm: "VINOD PATEL", address: "" },
+      { name: "Pavan Putra Mobile  Point & Accessories_Near Kapad Bazar _Vyara", code: "IN021575", bm: "VINOD PATEL", address: "" },
+      { name: "Phone King (Unit Of Bhatia Communication & Retail_Mosali Char Rasta_Mosali", code: "IN038406", bm: "VINOD PATEL", address: "" },
+      { name: "Poojara Telecom Pvt Ltd_Kabutar Khana_Vyara", code: "IN025514", bm: "VINOD PATEL", address: "" },
+      { name: "RAJ MOBILE_NEAR VAIBHAV CINEMA_VYARA_GUJARAT", code: "501002407", bm: "VINOD PATEL", address: "" },
+      { name: "RAJSHREE MOBILE POINT_OPPOSITE OLD BUS STATION_VYARA_GUJARAT", code: "501002325", bm: "VINOD PATEL", address: "" },
+      { name: "RESHMA MOBILE_NEAR OLD BUS STATION_VYARA_GUJARAT", code: "501000711", bm: "VINOD PATEL", address: "" },
+      { name: "UNICORN COMPUTER AND MOBILE GALLARY_BANK ROAD_VYARA_GUJARAT", code: "501004523", bm: "VINOD PATEL", address: "" },
+    ]
+  },
+  "DARSHAN PATEL": {
+    dealers: [
+      { name: "15451- A TO Z MOBILE_DUNGRI FALIYA DEGAM ROAD_VAPI", code: "IN109547", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "15460-SHREYA MOBILE SHOP_CHHIRI_VAPI", code: "IN117536", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "ASHAPURA MOBILE STORES_CHHIRI_VAPI_GUJARAT", code: "501004913", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "BADA MOBILEWALA_DUNGARI FALIYA_VAPI_GUJARAT", code: "IN101766", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "BHATIA COM &RETIALS IND PVT LTD_SHOP NO.27_SURAT", code: "IN124415", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD _  GUNJAN CITY CENTER_VAPI_GUJARAT", code: "501004799", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "BURHANI MOBILE SHOP_CHHIRI_VAPI_GUJARAT", code: "501001388", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Bhatia Communications & Retail (India) Limited_ Daman Road_Vapi", code: "IN016871", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "CHAMUNDA ELECTRONICS_CHHIRI_VAPI_GUJARAT", code: "501000140", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "CHAMUNDA MOBILE_CHANOD GATE_SILVASSA ROAD_VAPI", code: "IN125761", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Fonebox Retail Limited_Sai Mejesty Koparli Road_Vapi", code: "IN012801", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "G3 Second Hand Mobile Store_Sai Majesty Complex_Bardoli", code: "IN038090", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "GUPTA MOBILE SHOP_CHHIRI_VAPI_GUJARAT", code: "501001249", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "HEENA MOBILE SHOP_CHANOD_VAPI_GUJARAT", code: "501001403", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "JAI MATADI ENTERPRISES_BHADAKMORA_VAPI_GUJARAT", code: "501001397", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "JAY JALARAM MONEY MOBILE_CHHIRI_VAPI_GUJARAT", code: "501001414", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "KRISHNA TELECOM_DUNGARI FALIYA_VAPI_GUJARAT", code: "501004909", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "KUMAWAT MOBILE_CHANOD_VAPI_GUJARAT", code: "501001236", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "LUCKY MOBILE STORE_DUNGARI FALIYA_VAPI_GUJARAT", code: "501004899", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "MANISH MOBILE SHOP_DUNGARI FALIYA_VAPI_GUJARAT", code: "501001417", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "NIKITA ENTERPRISE_CHANOD_VAPI_GUJARAT", code: "501004900", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "PAYAL SALES_BHADAKMORA_VAPI_GUJARAT", code: "501001415", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "POGO ELECTRONICS_CHHIRI_VAPI_GUJARAT", code: "501007920", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_CHANOD_VAPI_GUJARAT", code: "IN103160", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "PREM MOBILE SHOP_CHHIRI_VAPI_GUJARAT", code: "501001386", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Phonewale Limited_Girnar Khushboo Plaza_Vapi", code: "IN016258", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Poojara Telecom Pvt Ltd (BM)_Koparli Road", code: "IN007337", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "R 11 Mobile_Silvassa Road_Vapi", code: "IN027951", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "R. K. MOBILE_DUNGRA_VAPI", code: "501001411", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Rakesh Enterprise_Koparli Road Mahadev Nagar Chhiri_Vapi", code: "IN012373", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "SHIV ELECTRONICS_DUNGRA_VAPI_GUJARAT", code: "501001187", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "SHREE RAJESHWAR CO. MOBILE SHOP_CHANOD_VAPI_GUJARAT", code: "501004904", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "VISHAL GENRAL STORES_CHANOD_VAPI_GUJARAT", code: "501001159", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "VISHAL GENRAL STORES_GUNJAN_VAPI_GUJARAT", code: "501001166", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "VISHAL GENRAL STORES_VAIBHAV MOBILE_GUNJAN_VAPI_GUJARAT", code: "501001161", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Vishal Mobile_Koprali Road_Vapi", code: "IN027975", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Vivek Mobile Shop_Chharwada Road_Vapi", code: "IN022750", bm: "HIREN BHANUSHALI", address: "" },
+    ]
+  },
+  "DHANSUKH MAKWANA": {
+    dealers: [
+      { name: "AJAY TELECOM_OLPAD_SURAT_GUJARAT", code: "501001434", bm: "JAY DABGAR", address: "" },
+      { name: "Azhar Mobile (Unit of Prakash Telecom)_Limbayat_Surat", code: "IN013132", bm: "JAY DABGAR", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_HAZIRA_SURAT_GUJARAT", code: "501004760", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_HONEY PARK_SURAT_GUJARAT", code: "501004837", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_ICHCHAPORE HAZIRA_SURAT_GUJARAT", code: "501004750", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_PALANPUR PATIA_SURAT_GUJARAT", code: "501004810", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_RANDER_SURAT_GUJARAT", code: "501004781", bm: "DHAVAL MALI", address: "" },
+      { name: "Bhatia Communications & Retail (India) Limited_ Jahangirabad_Surat", code: "IN014655", bm: "DHAVAL MALI", address: "" },
+      { name: "Bhatia Communications & Retail (India) Limited_Ayodhiya Nagri_Surat", code: "IN011703", bm: "DHAVAL MALI", address: "" },
+      { name: "Bhatia Communications & Retail (India) Limited_Shimadar Campus_Surat", code: "IN029666", bm: "DHAVAL MALI", address: "" },
+      { name: "FONEBOX RETAIL PVT LTD (A UNIT OF PHONEWALE) ADAJAN_SURAT", code: "501004731", bm: "JAY DABGAR", address: "" },
+      { name: "FONEBOX RETAIL PVT LTD (A UNIT OF PHONEWALE)_RAMAGAR_SURAT", code: "IN114531", bm: "JAY DABGAR", address: "" },
+      { name: "FONEBOX RETAIL PVT LTD (A UNIT OF PHONEWALE)_RANDER_SURAT", code: "501004737", bm: "JAY DABGAR", address: "" },
+      { name: "Fonebox Retail Pvt Ltd (A Unit Of Phonewale)_L P Savani", code: "501008750", bm: "JAY DABGAR", address: "" },
+      { name: "Gujarat Mobile World_Adajan_Surat", code: "IN011699", bm: "JAY DABGAR", address: "" },
+      { name: "Gujarat Mobile_Palanpur Jakatnaka_Surat", code: "IN035224", bm: "JAY DABGAR", address: "" },
+      { name: "HI  MOBILE_L P SAVANI_SURAT_GUJARAT", code: "501005138", bm: "DHAVAL MALI", address: "" },
+      { name: "KAUSHAL ELECTRONICS_OLPAD_SURAT_GUJARAT", code: "501001446", bm: "DHAVAL MALI", address: "" },
+      { name: "MOBILE ZONE_BHATAR_SURAT_GUJARAT", code: "501005387", bm: "JAY DABGAR", address: "" },
+      { name: "MOBILE ZONE_RANDER_SURAT_GUJARAT", code: "IN101763", bm: "JAY DABGAR", address: "" },
+      { name: "MOBILE ZONE_SURAT", code: "IN125179", bm: "JAY DABGAR", address: "" },
+      { name: "Mehta Retail Private Limited_Palanpur Patia_Surat", code: "IN035395", bm: "JAY DABGAR", address: "" },
+      { name: "ONLY MOBILE (UNIT OF BHATIA MOBILE)_KAJATNAKA_SURAT", code: "IN125330", bm: "DHAVAL MALI", address: "" },
+      { name: "PHONE WALE_L P SAVANI_SURAT_GUJARAT", code: "501008864", bm: "JAY DABGAR", address: "" },
+      { name: "PHONE WALE_RANDER_SURAT_GUJARAT", code: "501001364", bm: "JAY DABGAR", address: "" },
+      { name: "POOJARA TELECOM PVT LTD (5G)_PALANPUR PATIYA_SURAT", code: "IN022982", bm: "DHAVAL MALI", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_ICHCHHAPOR_SURAT", code: "IN120734", bm: "DHAVAL MALI", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_RANDER_SURAT_GUJARAT", code: "501008829", bm: "DHAVAL MALI", address: "" },
+      { name: "PRAKASH TELECOM_RANDER_SURAT_GUJARAT", code: "501000063", bm: "JAY DABGAR", address: "" },
+      { name: "PRIYA MOBILE_L P SAVANI_SURAT_GUJARAT", code: "501004999", bm: "DHAVAL MALI", address: "" },
+      { name: "Phone Wale_Narayan Park", code: "IN005451", bm: "JAY DABGAR", address: "" },
+      { name: "Phone Wale_Sachin Bazar_Surat", code: "IN015851", bm: "JAY DABGAR", address: "" },
+      { name: "Pocket Phone (Unit Of Mehta Retail Pvt Ltd)_Goga Chowk_Surat", code: "IN036559", bm: "JAY DABGAR", address: "" },
+      { name: "Poojara Telecom Pvt Ltd (5G)_Mora Hazira_Surat", code: "IN022985", bm: "DHAVAL MALI", address: "" },
+      { name: "Poojara Telecom Pvt Ltd_Kawas_Surat", code: "IN015271", bm: "DHAVAL MALI", address: "" },
+      { name: "Poojara Telecom Pvt Ltd_Palanpur Gam_Surat", code: "IN026414", bm: "DHAVAL MALI", address: "" },
+      { name: "Prakash Telecom_Olpad_Surat_Gujarat", code: "501000061", bm: "JAY DABGAR", address: "" },
+      { name: "Priya Mobile_Mora Bhagal", code: "501004942", bm: "JAY DABGAR", address: "" },
+      { name: "Ramdev Mobile_Randel Road_Surat", code: "IN031434", bm: "DHAVAL MALI", address: "" },
+      { name: "SHREE VARDHMAN ELECTRONICS_OLPAD_SURAT_GUJARAT", code: "501005279", bm: "DHAVAL MALI", address: "" },
+      { name: "Surat Mobile (Unit Of Prakash Telecom)_Rander Road_Surat", code: "IN021455", bm: "JAY DABGAR", address: "" },
+      { name: "UMIYA MOBILE PVT LTD_RAM NAGAR_RANDER", code: "IN123706", bm: "DHAVAL MALI", address: "" },
+      { name: "Vinit Mobile Pvt Ltd_ Ichapor_Surat", code: "IN020018", bm: "JAY DABGAR", address: "" },
+      { name: "Vinit Mobile_Hazira Mora_Surat", code: "IN026301", bm: "JAY DABGAR", address: "" },
+      { name: "YES MOBILE_PAL ADAJAN_SURAT_GUJARAT", code: "501005054", bm: "DHAVAL MALI", address: "" },
+    ]
+  },
+  "IBRAHIM": {
+    dealers: [
+      { name: "BALAJI ENTERPRISES_GUNJAN_VAPI_GUJARAT", code: "501001240", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "BHAKTI MOBILE_VAPI TOWN_VAPI_GUJARAT", code: "IN101051", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "BHATIA COM & RETIALS IND PVT LTD SRT_GOVINDA COMPLEX_VAPI", code: "IN115479", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_CHALA ROAD_VAPI_GUJARAT", code: "501004836", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_GUNJAN_VAPI_GUJARAT", code: "501004839", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_VAPI_GUJARAT", code: "501004821", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "FIRST CHOICE_GUNJAN_VAPI_GUJARAT", code: "501001233", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "GANESH MOBILE_VAPI CHAR RASTA_VAPI", code: "501001393", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "GUPTA MOBILE SHOP_GUNJAN_VAPI_GUJARAT", code: "501001247", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Gujarat Mobile_Bhanu Hills_Vapi", code: "IN034598", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Gujarat Mobile_Gogalnagar_Vapi", code: "IN030379", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Gujarat Mobile_Shubh Laxmi Apartment_Vapi", code: "IN036023", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Hariom Mobile & Electronics -Vapi", code: "IN004350", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "KRISHNA MOBILE_VAPI CHAR RASTA_VAPI_GUJARAT", code: "501000168", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "METRO CARE_VAPI TOWN_VAPI_GUJARAT", code: "501001398", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Mahakal Mobile_Station Road", code: "IN006986", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "NATIONAL ELECTRONICS_GUNJAN_VAPI_GUJARAT", code: "501001420", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "SHITAL COMMUNICATION_GUNJAN_VAPI_GUJARAT", code: "501001196", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "SHIVAM ENTERPRISE_VAPI TOWN_VAPI_GUJARAT", code: "501001232", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "SHREE GANESH MOBILE SALES AND SERVICE_VAPI TOWN_VAPI_GUJARAT", code: "501003833", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "SHREE GAYATRI GEN. STORES_GUNJAN_VAPI_GUJARAT", code: "501001165", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "SHRI NIMBESHWAR MOBILE SHOP - GUNJAN VAPI_GUJARAT", code: "501001244", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "SNOW MOBILE SHOP_TANKI FALIYA_VAPI", code: "IN125115", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "SUPER  ELECTRONICS_VAPI TOWN_VAPI_GUJARAT", code: "501001404", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "The Cellphone Studio_Vapi", code: "IN005106", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "V B ELECTRONICS_GUNJAN_VAPI_GUJARAT", code: "501001385", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "V3 Mobile Store_V3 Girnar Plaza_Vapi", code: "501001158", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Your Mobile (Unit Of Gujrat Mobile)_ Moraji Circal_Vapi", code: "IN020732", bm: "HIREN BHANUSHALI", address: "" },
+    ]
+  },
+  "KAILASH VAIDYA": {
+    dealers: [
+      { name: "Agrawal Mobile (Unit Of Mahavir Mobile)_Parvat Patia_Dumbhal_Surat", code: "IN125513", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM & RETAIL IND PVT LTD_MAHARANA PRATAP CHOWK_SURAT", code: "IN124893", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_GODADARA_SURAT_GUJARAT", code: "501004792", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_MAHAPRABHU NAGAR_SURAT_GUJARAT", code: "IN103007", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_NAVAGAM LAXMI NAGAR_SURAT_GUJARAT", code: "501004806", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COMMUNICATION & RETAIL (INDIA) LTD_NILGIRI_SURAT", code: "IN123366", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COMMUNICATIONS & RETAIL (INDIA) LIMITED_UDHNA UDHYOG NAGAR_SURAT", code: "IN030176", bm: "DHAVAL MALI", address: "" },
+      { name: "BISMILLAH MOBILE (UNIT OF TOP11 MOBILE SHOP AND ACCESSORIES)_SARDAR NAGAR_SURAT", code: "IN032088", bm: "JAY DABGAR", address: "" },
+      { name: "Bhatia Com And Retail Ind Pvt Ltd_Limbayat_Surat", code: "IN034673", bm: "DHAVAL MALI", address: "" },
+      { name: "Bhatia Communication & Retail (India) Ltd_Limbayat_Surat", code: "IN014653", bm: "DHAVAL MALI", address: "" },
+      { name: "Bhatia Communication & Retail (India) Ltd_Parvat Patiya_Surat", code: "IN033969", bm: "DHAVAL MALI", address: "" },
+      { name: "Bhatia Communications & Retail (India) Limited_Khanpura_Surat", code: "IN031624", bm: "DHAVAL MALI", address: "" },
+      { name: "FONEBOX RETAIL PVT LTD (A UNIT OF PHONEWALE)_DINDOLI_SURAT", code: "IN125148", bm: "JAY DABGAR", address: "" },
+      { name: "Fone Plus (Unit Of Gujarat Mobile)_Limbayat_Surat", code: "IN036957", bm: "JAY DABGAR", address: "" },
+      { name: "GUJARAT MOBILE WORLD_AJMAL PLACE_SURAT", code: "IN124900", bm: "JAY DABGAR", address: "" },
+      { name: "GUJRAT MOBILE WORLD_GODADARA_SURAT_GUJARAT", code: "IN104441", bm: "JAY DABGAR", address: "" },
+      { name: "Gujarat Mobile World_Gurudut Point_Surat", code: "IN009914", bm: "JAY DABGAR", address: "" },
+      { name: "Gujarat Mobile_ Parvat Patiya_Surat", code: "IN014013", bm: "JAY DABGAR", address: "" },
+      { name: "Gujarat Mobile_Dana Shoping Center_Surat", code: "IN012869", bm: "JAY DABGAR", address: "" },
+      { name: "Gujarat Mobile_Limbayat_Surat", code: "IN022582", bm: "JAY DABGAR", address: "" },
+      { name: "Gujarat_Top11 Mobile Shop And Accessories_MS", code: "IN016564", bm: "JAY DABGAR", address: "" },
+      { name: "MAHAVIR MOBILE_PARVAT PATIYA_SURAT_GUJARAT", code: "501005043", bm: "DHAVAL MALI", address: "" },
+      { name: "MAHAVIR MOBILE_SAHRA DARWAJA UMARWADA_SURAT", code: "IN124856", bm: "JAY DABGAR", address: "" },
+      { name: "MAHAVIR MOBILE_SANKESHWAR COMPLEX_SURAT_GUJARAT", code: "501005122", bm: "JAY DABGAR", address: "" },
+      { name: "MOBILE HOUSE_PARVAT PATIYA_SURAT_GUJARAT", code: "501004279", bm: "DHAVAL MALI", address: "" },
+      { name: "Mahavir Mobile_Dindoli_Surat", code: "IN026843", bm: "JAY DABGAR", address: "" },
+      { name: "Mehta Retail Pvt Ltd_Limbayat_Surat", code: "IN036244", bm: "JAY DABGAR", address: "" },
+      { name: "New Shubham Mobile And Electronics_Navagam_Surat", code: "IN017978", bm: "JAY DABGAR", address: "" },
+      { name: "PHONE WALE_PARVAT PATIYA_SURAT_GUJARAT", code: "501008979", bm: "JAY DABGAR", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_ABHILASHA HEIGHTS_PARVAT", code: "IN119594", bm: "DHAVAL MALI", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_LIMBAYAT_SURAT", code: "IN023198", bm: "DHAVAL MALI", address: "" },
+      { name: "Phone Plus (Unit Of Umiya Mobile Pvt Ltd)_Nilgiri Road_Surat", code: "IN037638", bm: "DHAVAL MALI", address: "" },
+      { name: "RASNA MOBILE & ELECTRONICS_LIMBAYAT_SURAT", code: "501002442", bm: "JAY DABGAR", address: "" },
+      { name: "SANVARIYA MOBILE SHOP_SAROLI_SURAT_GUJARAT", code: "501006317", bm: "DHAVAL MALI", address: "" },
+      { name: "SHREE GANESH MOBILE_NAVAGAM_DINDOLI_SURAT_GUJARAT", code: "501005061", bm: "JAY DABGAR", address: "" },
+      { name: "SHREE GANESH MOBILE_SAROLI_SURAT", code: "501006326", bm: "DHAVAL MALI", address: "" },
+      { name: "SHUBHAM MOBILE WORLD_NAVAGAM_DINDOLI_SURAT_GUJARAT", code: "501005051", bm: "JAY DABGAR", address: "" },
+      { name: "Sanvariya Mobile Shop_Saniya_Surat", code: "IN022237", bm: "DHAVAL MALI", address: "" },
+      { name: "Shree Ganesh Mobile_C R Patil Road", code: "501005290", bm: "JAY DABGAR", address: "" },
+      { name: "Shree Ganesh Mobile_Saniya_Surat", code: "IN031959", bm: "DHAVAL MALI", address: "" },
+      { name: "TOP 10 MOBILE_EIDGAH ROAD_SURAT", code: "IN116250", bm: "JAY DABGAR", address: "" },
+      { name: "TOP11 MOBILE SHOP AND ACCESSORIES_LIMBAYAT_SURAT", code: "IN032025", bm: "JAY DABGAR", address: "" },
+      { name: "TOP11 Mobile Shop And Accessories_Madina Masjid", code: "IN110245", bm: "JAY DABGAR", address: "" },
+      { name: "VINIT MOBILE_NILGIRI-2", code: "IN120214", bm: "JAY DABGAR", address: "" },
+      { name: "Vinit Mobile_ Magob_Surat", code: "IN020780", bm: "JAY DABGAR", address: "" },
+    ]
+  },
+  "KIRAN DABHELKAR": {
+    dealers: [
+      { name: "17138-BADA MOBILE STORE_SHOP NO.17_DAMANA", code: "IN116397", bm: "ASHISH DHANGAR", address: "" },
+      { name: "17141-ROSHANI MOBILE &ELECTRONICS_DORI KADAIYA_DAMAN", code: "IN118420", bm: "ASHISH DHANGAR", address: "" },
+      { name: "7 HOURSES MOBILE_NANI DAMAN_DAMAN_GUJARAT", code: "IN102837", bm: "ASHISH DHANGAR", address: "" },
+      { name: "ANKUR MOBILE_ATHIYAWAD_DAMAN_GUJARAT", code: "501004997", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Atul Mobile Shop", code: "IN105173", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Atul Mobile Shop_Chhiri Road_Vapi", code: "IN016559", bm: "ASHISH DHANGAR", address: "" },
+      { name: "BAJARANG MOBILE_BHIMPORE_DAMAN_GUJARAT", code: "501004272", bm: "ASHISH DHANGAR", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_FORTUNE DP PLAZA_DAMAN", code: "IN028734", bm: "ASHISH DHANGAR", address: "" },
+      { name: "BHOLA GENERAL STORE_KACHIGAM_DAMAN_GUJARAT", code: "501004283", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Gujarat Mobile_Daman Road_Daman", code: "IN033088", bm: "ASHISH DHANGAR", address: "" },
+      { name: "M R Traders_Nani Daman_Daman", code: "501001844", bm: "ASHISH DHANGAR", address: "" },
+      { name: "MAA RANI BHATIYANI ELECTRONIC AND MO_SOMNATH_DAMAN_GUJARAT", code: "501001880", bm: "ASHISH DHANGAR", address: "" },
+      { name: "NEW RAJ MOBILE ELECTRONICS_SOMNATH ARCADE SHOPPING_DAMAN", code: "501001798", bm: "ASHISH DHANGAR", address: "" },
+      { name: "OM SAI MOBILE_BHESLOR_DAMAN_GUJARAT", code: "501003219", bm: "ASHISH DHANGAR", address: "" },
+      { name: "PUNIT MOBILE SHOP_MASHAL CHOK_DAMAN_GUJARAT", code: "501001905", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Poojara Telecom Pvt Ltd_Daman", code: "IN005435", bm: "ASHISH DHANGAR", address: "" },
+      { name: "RAJ STD MOBILE AND GENERAL STORE_SOMNATH_DAMAN_GUJARAT", code: "501004278", bm: "ASHISH DHANGAR", address: "" },
+      { name: "RAMDEV MOBILE STORE_ATHIYAWAD_DAMAN_GUJARAT", code: "501004281", bm: "ASHISH DHANGAR", address: "" },
+      { name: "S.S.TELECOM_KACHIGAM_DAMAN_GUJARAT", code: "501001896", bm: "ASHISH DHANGAR", address: "" },
+      { name: "SHREE ARBUDHA MOBILES_BHIMPORE_DAMAN_GUJARAT", code: "501004998", bm: "ASHISH DHANGAR", address: "" },
+      { name: "SHREE MAJHISA MOBILE SHOP_ATHIYAWAD_DAMAN", code: "501001890", bm: "ASHISH DHANGAR", address: "" },
+      { name: "SHREEJI MOBILE_NANI DAMAN_DAMAN", code: "501003930", bm: "ASHISH DHANGAR", address: "" },
+      { name: "SUNDHAMATA MOBILE AND ELECTRONICS_SOMNATH_DAMAN_GUJARAT", code: "501004292", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Shri Jashnath Mobile_Kevdi Faliya_Daman", code: "IN030760", bm: "ASHISH DHANGAR", address: "" },
+      { name: "VIJETA MOBILE_BHIMPORE_DAMAN", code: "IN117537", bm: "ASHISH DHANGAR", address: "" },
+    ]
+  },
+  "PRAMOD PRAJAPATI": {
+    dealers: [
+      { name: "AMRIT MOBILE_KUBER NAGAR_SURAT", code: "501005119", bm: "JAY DABGAR", address: "" },
+      { name: "AMRIT MOBILE_LIMBAYAT_SURAT", code: "501004038", bm: "JAY DABGAR", address: "" },
+      { name: "AMRIT MOBILE_MAHA PRABHU NAGAR_SURAT", code: "501005118", bm: "JAY DABGAR", address: "" },
+      { name: "AMRIT SELECTION_RING ROAD_SURAT_GUJARAT", code: "501000286", bm: "JAY DABGAR", address: "" },
+      { name: "AMRIT SELECTION_VESU_SURAT", code: "IN125418", bm: "JAY DABGAR", address: "" },
+      { name: "ARIHANT SELECTION_RING ROAD_SURAT_GUJARAT", code: "501000280", bm: "JAY DABGAR", address: "" },
+      { name: "Amrit Mobiles_Gaurav Path Road_Surat", code: "IN032777", bm: "JAY DABGAR", address: "" },
+      { name: "BHATIA COM & RETAIL IND PVT LTD_ROYAL TRADING TOWER_SURAT", code: "IN118508", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_MODERN RING ROAD_SURAT_GUJARAT", code: "501004766", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_PIPLOD_SURAT_GUJARAT", code: "501004778", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_RING ROAD_1_2_SURAT_GUJARAT", code: "501004830", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COMMUNICATION & RETAIL (INDIA) LTD_VIP ROAD VESU_SURAT", code: "IN112258", bm: "DHAVAL MALI", address: "" },
+      { name: "BHAVANI MOBILES_SALABATPURA_SURAT", code: "IN119545", bm: "JAY DABGAR", address: "" },
+      { name: "BHAVANI MOBILE_RING ROAD_SURAT_GUJARAT", code: "501000281", bm: "JAY DABGAR", address: "" },
+      { name: "Bhatia Com And Retail Ind Pvt Ltd_Bhatar Road_Surat", code: "IN022223", bm: "DHAVAL MALI", address: "" },
+      { name: "Bhatia Com And Retail Ind Pvt Ltd_Umarwada_Surat", code: "IN018776", bm: "DHAVAL MALI", address: "" },
+      { name: "Bhatia Communication & Retail (India) Ltd_Udhana Darwaja", code: "IN003870", bm: "DHAVAL MALI", address: "" },
+      { name: "Bhatia Communication And Retail (India) Ltd _Shiv Shakti Society_Surat", code: "IN007629", bm: "DHAVAL MALI", address: "" },
+      { name: "CHARBHUJA MOBILE AND MONEY TRANSFER_ALTHAN_SURAT_GUJARAT", code: "501000474", bm: "JAY DABGAR", address: "" },
+      { name: "Deal Planet (A Unit Of Hi Mobile)_Salabatpura_Surat", code: "IN030764", bm: "DHAVAL MALI", address: "" },
+      { name: "Fonebox Retail Pvt Ltd (A Unit Of Phonewale)_Ring Road", code: "501003668", bm: "JAY DABGAR", address: "" },
+      { name: "GUJARAT MOBILE_ELBEE TOWER C_SURAT", code: "IN124861", bm: "JAY DABGAR", address: "" },
+      { name: "GUJARAT_AMRIT SELECTION_MS", code: "IN031494", bm: "JAY DABGAR", address: "" },
+      { name: "Gujarat Mobile_Ring Road_Surat", code: "IN033866", bm: "JAY DABGAR", address: "" },
+      { name: "Gujarat_Phone Merchant_MS", code: "IN023234", bm: "JAY DABGAR", address: "" },
+      { name: "Hello Mobile Collection_Dayaman Manzil_Surat", code: "IN012350", bm: "JAY DABGAR", address: "" },
+      { name: "Mobile Station_Vesu_Surat", code: "IN027150", bm: "DHAVAL MALI", address: "" },
+      { name: "OSIA TELECOM_RING ROAD_SURAT_GUJARAT", code: "501005151", bm: "JAY DABGAR", address: "" },
+      { name: "PHONE MERCHANT_GHOD DOD ROAD_SURAT_GUJARAT", code: "501000024", bm: "JAY DABGAR", address: "" },
+      { name: "PHONE MERCHANT_GUJARAT GAS CIRCLE ADAJAN_SURAT_GUJARAT", code: "501000025", bm: "JAY DABGAR", address: "" },
+      { name: "PHONE MERCHANT_KATARGAM_SURAT_GUJARAT", code: "501000027", bm: "JAY DABGAR", address: "" },
+      { name: "PHONE MERCHANT_VED ROAD_SURAT_GUJARAT", code: "501000030", bm: "JAY DABGAR", address: "" },
+      { name: "PHONE WALE_VESU_SURAT", code: "501004722", bm: "JAY DABGAR", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_RING ROAD_SURAT_GUJARAT", code: "IN101507", bm: "DHAVAL MALI", address: "" },
+      { name: "Poojara Telecom Pvt Ltd_Vesu", code: "IN101509", bm: "DHAVAL MALI", address: "" },
+      { name: "Ramdev Mobile_Salabatpura Main Road_Surat", code: "IN037808", bm: "DHAVAL MALI", address: "" },
+      { name: "UMIYA MOBILE WORLD_BHATAR_SURAT_GUJARAT", code: "501004892", bm: "JAY DABGAR", address: "" },
+      { name: "Umiya Mobile Limited_Salabatpura_Surat", code: "IN024124", bm: "DHAVAL MALI", address: "" },
+      { name: "VIJAY COLLECTION_RING ROAD_SURAT_GUJARAT", code: "501000246", bm: "JAY DABGAR", address: "" },
+    ]
+  },
+  "RAJESH CHAPANERIA": {
+    dealers: [
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_ANAVAL_NAVSARI_GUJARAT", code: "501004741", bm: "TBA", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_BAPA SITARAM CHOWK KAMREJ_SURAT_GUJARAT", code: "501004759", bm: "VINOD PATEL", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_CHAR RASTA KAMREJ_SURAT_GUJARAT", code: "501004800", bm: "VINOD PATEL", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_CHIKHALI_NAVSARI_GUJARAT", code: "501004780", bm: "TBA", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_GUJARAT SHOPPING CENTER_SURAT_GUJARAT", code: "501004798", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_KARANJ_SURAT_GUJARAT", code: "501004835", bm: "VINOD PATEL", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_KIM_SURAT_GUJARAT", code: "501004797", bm: "VINOD PATEL", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_KOSAMBA_SURAT_GUJARAT", code: "501004803", bm: "VINOD PATEL", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_NAVSARI_GUJARAT", code: "501004805", bm: "TBA", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_PIPODARA_SURAT_GUJARAT", code: "501004758", bm: "VINOD PATEL", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_RANKUWA_NAVSARI_GUJARAT", code: "501004822", bm: "TBA", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_SACHIN MS_SURAT_GUJARAT", code: "501004817", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_SACHIN_SURAT_GUJARAT", code: "501004757", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_SAYAN_SURAT_GUJARAT", code: "501004779", bm: "VINOD PATEL", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_SHYAM MARKET_SURAT_GUJARAT", code: "501004819", bm: "VINOD PATEL", address: "" },
+      { name: "BHATIA COMMUNICATION & RETAIL (INDIA) LTD_SHYAM COMPLEX_SURAT", code: "IN111546", bm: "VINOD PATEL", address: "" },
+      { name: "BHATIA COMMUNICATION AND RETAIL (INDIA) LIMITED_MOSHALI_SURAT", code: "IN024825", bm: "VINOD PATEL", address: "" },
+      { name: "BHATIA COMMUNICATION AND RETAIL (INDIA) LTD_PALSANA_SURAT", code: "IN113404", bm: "VINOD PATEL", address: "" },
+      { name: "BHATIA COMMUNICATION AND RETAIL_LINDIYAT PIPODRA_SURAT", code: "IN028293", bm: "VINOD PATEL", address: "" },
+      { name: "BHATIA COMMUNICATION AND RETAIL_PIPODRA SILVET TEXTILE_SURAT", code: "IN024219", bm: "VINOD PATEL", address: "" },
+      { name: "Bhatia Com And Retail Ind Pvt Ltd_Chirag Complex_Surat", code: "IN030725", bm: "VINOD PATEL", address: "" },
+      { name: "Bhatia Com And Retail Ind Pvt Ltd_Mahal Road_Dang", code: "IN036465", bm: "TBA", address: "" },
+      { name: "Bhatia Com And Retail Ind Pvt Ltd_Rumla_Gujarat", code: "501004788", bm: "TBA", address: "" },
+      { name: "Bhatia Com And Retail Ind Pvt Ltd_Tirupati Hights_Bilimora", code: "IN027037", bm: "TBA", address: "" },
+      { name: "Bhatia Com And Retail Ind Pvt Ltd_Umra_Surat", code: "IN036079", bm: "VINOD PATEL", address: "" },
+      { name: "Bhatia Communication & Retail (India) Limited_Kamrej 4_Surat", code: "IN021094", bm: "VINOD PATEL", address: "" },
+      { name: "Bhatia Mobile_ Shree Datt Plaza_Vansda", code: "IN016455", bm: "TBA", address: "" },
+      { name: "GUJRAT MOBILE WORLD_LH ROAD_SURAT_GUJARAT", code: "501004352", bm: "JAY DABGAR", address: "" },
+      { name: "GUJRAT MOBILE WORLD_MARUTI NANDAN_LH ROAD_SURAT", code: "IN113211", bm: "JAY DABGAR", address: "" },
+      { name: "GUJRAT MOBILE WORLD_RACHNA CIRCEL_SURAT_GUJARAT", code: "IN112374", bm: "JAY DABGAR", address: "" },
+      { name: "Gujarat Mobile_Sachin_Surat", code: "IN024086", bm: "JAY DABGAR", address: "" },
+      { name: "HAVEMORE COMMUNICATION_SIMADA NAKA_SURAT", code: "501005132", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMOR COMMUNICATION_GOPAL DARSHAN_SURAT_GUJARAT", code: "501003583", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMOR COMMUNICATION_GUJARAT SHOPPING  KAPODRA_SURAT_GUJARAT", code: "501003586", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMOR COMMUNICATION_KATARGAM_SURAT_GUJARAT", code: "501003595", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMOR COMMUNICATION_PANDESARA_SURAT", code: "IN110432", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMOR COMMUNICATION_PEOPLES CHAR RASTA KATARGAM_SURAT_GUJARAT", code: "501003584", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMOR COMMUNICATION_PODDAR ARCADE_SURAT_GUJARAT", code: "501002513", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMOR COMMUNICATION_RACHANA CIRCLE  KAPODRA_SURAT_GUJARAT", code: "501003587", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMOR COMMUNICATION_RING ROAD_SURAT_GUJARAT", code: "501003588", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMOR COMMUNICATION_SURAT_GUJARAT", code: "501008870", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMOR COMMUNICATION_VARNI PLAZA_SURAT", code: "IN023431", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMOR COMMUNICATION_VED ROAD_SURAT_GUJARAT", code: "501003585", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMORE MOBILE MOBILE.COM_SURAT_GUJARAT", code: "501000250", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMORE MOBILE_GUJARAT GAS CIRCLE ADAJAN_SURAT_GUJARAT", code: "501000275", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMORE MOBILE_KAPODARA_SURAT_GUJARAT", code: "501000254", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMORE MOBILE_KATARGAM_SURAT_GUJARAT", code: "501000256", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMORE MOBILE_MOBILE COMPANY_SURAT_GUJARAT", code: "501000260", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMORE MOBILE_MOBILE WALA_SURAT_GUJARAT", code: "501000273", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMORE MOBILE_NILGIRI_SURAT_GUJARAT", code: "501000268", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMORE MOBILE_PODDAR ARCADE_SURAT_GUJARAT", code: "501000276", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMORE MOBILE_RAMNAGAR_SURAT_GUJARAT", code: "501000241", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMORE MOBILE_RING ROAD_SURAT_GUJARAT", code: "501000247", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMORE MOBILE_SURAT_GUJARAT", code: "501000255", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMORE MOBILE_VED RD_SURAT", code: "IN032023", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMORE MOBILE_VED ROAD_SURAT", code: "501000263", bm: "DHAVAL MALI", address: "" },
+      { name: "HAVMORE MOBILE_YOGI CHOWK_SURAT_GUJARAT", code: "501000264", bm: "DHAVAL MALI", address: "" },
+      { name: "HEVMOR COMMUNICATION_RUSTAM PARK_SURAT", code: "IN023430", bm: "DHAVAL MALI", address: "" },
+      { name: "Havmore Mobile_Bhimrad Althan Road_Surat", code: "IN036512", bm: "DHAVAL MALI", address: "" },
+      { name: "Havmore Mobile_Simada Naka_Surat_Surat", code: "IN008204", bm: "DHAVAL MALI", address: "" },
+      { name: "JEMS MOBILE GALLERY_BAMROLI_SURAT_GUJARAT", code: "501002461", bm: "JAY DABGAR", address: "" },
+      { name: "JEMS MOBILE GALLERY_NAVAGAM_DINDOLI_SURAT_GUJARAT", code: "501008960", bm: "JAY DABGAR", address: "" },
+      { name: "JEMS MOBILE GALLERY_PANDESARA_SURAT_GUJARAT", code: "501002453", bm: "JAY DABGAR", address: "" },
+      { name: "Jems Mobile Gallery_ Bamroli Road_Surat", code: "IN027839", bm: "JAY DABGAR", address: "" },
+      { name: "Jems Mobile Gallery_Vadodgam_Surat", code: "IN014019", bm: "JAY DABGAR", address: "" },
+      { name: "MOBILE MALL_PANNALAL COMPLEX_SURAT", code: "IN123693", bm: "JAY DABGAR", address: "" },
+      { name: "Mobile Station (Unit Of Bhatia Communications & Retail (India) Limited)_Adarsh Nagar -1_Surat", code: "IN025811", bm: "VINOD PATEL", address: "" },
+      { name: "Mobile Station_Kosamba", code: "IN006337", bm: "VINOD PATEL", address: "" },
+      { name: "ONLY MOBILE (UNIT OF BHATIA COM AND RETAIL IND PVT LTD)_RAILWAY ROAD_CHIKHLI", code: "IN028724", bm: "TBA", address: "" },
+      { name: "Phone King (A Unit Of Bhatia Communication & Retail (India) Limited)_Shraddha Plaza Complex_Surat", code: "IN037608", bm: "VINOD PATEL", address: "" },
+      { name: "Phone King (Unit Of Bhatia Communications & Retail (India) Ltd)_Hanumanbari_Vansda", code: "IN037121", bm: "TBA", address: "" },
+      { name: "Phone Wala (Unit Of Havmor Mobile)_Ved Road_Surat", code: "IN036357", bm: "DHAVAL MALI", address: "" },
+      { name: "SEJAL MOBILE_SACHIN_SURAT_GUJARAT", code: "501006075", bm: "JAY DABGAR", address: "" },
+      { name: "Sejal Mobile_Sachin_Surat", code: "IN025979", bm: "JAY DABGAR", address: "" },
+      { name: "VISHAL MOBILE_BHESTAN_SURAT_GUJARAT", code: "501006072", bm: "JAY DABGAR", address: "" },
+      { name: "VISHAL MOBILE_SACHIN_SURAT_GUJARAT", code: "501006070", bm: "JAY DABGAR", address: "" },
+      { name: "VISHAL MOBILE_SURAT_GUJARAT", code: "501006079", bm: "JAY DABGAR", address: "" },
+      { name: "Vishal Mobile_Dev Complex_Surat", code: "IN015673", bm: "JAY DABGAR", address: "" },
+      { name: "Vishal Mobile_Paligaon Road_Surat", code: "IN021125", bm: "JAY DABGAR", address: "" },
+      { name: "Vishal Mobile_Pandesara_Surat", code: "IN037653", bm: "JAY DABGAR", address: "" },
+      { name: "Vishal Mobile_Suda 3_Surat", code: "IN021120", bm: "JAY DABGAR", address: "" },
+      { name: "Vishal Mobile_Talangpur Road_Surat", code: "IN027354", bm: "JAY DABGAR", address: "" },
+      { name: "Your Mobile (Unit Of Gujarat Mobile)_Katargam Road_Surat", code: "IN031622", bm: "JAY DABGAR", address: "" },
+      { name: "Your Mobile (Unit Of Gujarat Mobile)_Pul Mithikhadi_Surat", code: "IN031623", bm: "JAY DABGAR", address: "" },
+    ]
+  },
+  "SHASHANK YADAV": {
+    dealers: [
+      { name: "16174-BHATIA COMM AND RETAIL INDIA LTD-(ONLY MOBILE)_GANDHIWADI_UMBERGAON", code: "IN121450", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "A B ELECTRONICS_SARIGAM_UMBERGAON_GUJARAT", code: "501001392", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "ALI ELECTRONIC AND MOBILE SHOP_SARIGAM_UMBERGAON_GUJARAT", code: "501005846", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "ASHIRWAD MOBILE CARE_BHILAD_UMBERGAON_GUJARAT", code: "501000320", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "BHATIA COM AND RETIALS IND PVT LTD SRT_SATATION ROAD_UMBERGAON", code: "IN119098", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "BHILAD ELECTRONICS_BHILAD_UMBERGAON_GUJARAT", code: "501005850", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Bhaita Com And Retail Pvt Ltd_Umargam", code: "IN005676", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Bhatia Com And Retail Ind Pvt Ltd_Bhilad Old Market_Bhilad", code: "IN031009", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Bhatia Com And Retail Ind Pvt Ltd_Khatalwada_Umbergaon", code: "IN033087", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Bhatia Communications & Retail (India) Limited_Station Road Sanjan_Umbergaon", code: "IN029860", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Fone Plus (Unit Of Gujarat Mobile)_Mohan Nagar_Umbergoan", code: "IN038628", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "GUJARAT COMMUNICATION_GIDC UMBERGAON_UMBERGAON_GUJARAT", code: "501005818", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Gujarat Mobile_Sanjan Char Rasta_Sanjan", code: "IN022738", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "K.D CENTER MOBILE AND COMPUTER SHOP_BHILAD_UMBERGAON_GUJARAT", code: "501005827", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "KANAIYA TELECOM AND XEROX_GIDC UMBERGAON_UMBERGAON_GUJARAT", code: "501005826", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Mobile Ghar (Unit Of Bhatia Communication And Retail Pvt Ltd)_Galaxy Charaniya_Umbergaon Solsumba", code: "IN031014", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Mobile Station_Talasari Road_Umbergaon", code: "IN026960", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "NAGESHWAR MOBILE AND ELECTRONICS_GANDHIWADI_UMBERGAON_GUJARAT", code: "501005813", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "NAYOSHA COMMUNICATION_STATION ROAD_UMBERGAON_GUJARAT", code: "501005820", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "OM SAI MOBILE_GANGANAGAR_UMBERGAON_GUJARAT", code: "501005821", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Om Sai Telecom_Valsad_Umbergaon", code: "IN015058", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_JAIN TEMPLE_BHILAD", code: "IN121004", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_NALANDA PALACE_UMBERGAUN (BM)", code: "IN119824", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_SOLSUMBA_UMBERGAON", code: "IN119959", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_UMBERGAON_SANJAN", code: "IN122219", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_UMBERGAON_STATI", code: "IN121003", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Phone Plus (Unit Of Umiya Mobile Ltd)_Udhav Road_Sanjan", code: "IN031012", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Phonewale_Ground Floor_Sanjan", code: "IN023636", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Poojara Telecom Pvt Ltd_Sanjan", code: "IN006977", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Prajapati Mobile Stores_Bhilad_Umbergaon", code: "IN020128", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "R P Sales_Sanjan Bhilad Road_Sanjan", code: "IN034552", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "RAKESH ELECTRONICS_BHILAD_UMBERGAON", code: "IN123839", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "ROSHNI MOBILE SHOP_GANDHIWADI_UMBERGAON_GUJARAT", code: "501005835", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "RUPAL TELECOM_SARIGAM_UMBERGAON_GUJARAT", code: "501001318", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "SAARA MOBILES_GANDHIWADI_UMBERGAON_GUJARAT", code: "501005816", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "SHIV SAKTI MOBILE_SARIGAM_UMBERGAON_GUJARAT", code: "IN103476", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "SHIVAM ELECTRONICS_SOLSUMBA_UMBERGAON_GUJARAT", code: "501005812", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "THE VOICE MOBILE_SANJAN_UMBERGAON_GUJARAT", code: "501005829", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "YELLOW MULTI ZONE MOBILE SHOP_SOLSUMBA_UMBERGAON", code: "IN122402", bm: "HIREN BHANUSHALI", address: "" },
+      { name: "Your Mobile (Unit Of Gujarat Mobile)_Nargol Road_Sarigam", code: "IN037784", bm: "HIREN BHANUSHALI", address: "" },
+    ]
+  },
+  "VIJAY PARMAR": {
+    dealers: [
+      { name: "A R TELCOM_PARDI_VALSAD_GUJARAT", code: "501004228", bm: "ASHISH DHANGAR", address: "" },
+      { name: "AKB MOBILE GALLERY_PARDI_VALSAD_GUJARAT", code: "501008875", bm: "ASHISH DHANGAR", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_PARDI_VALSAD_GUJARAT", code: "501004812", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Bhatia Com And Retail Ind Pvt Ltd_Azad Chowk_Valsad", code: "IN038469", bm: "ASHISH DHANGAR", address: "" },
+      { name: "FONEBOX RETAIL PVT LTD (A UNIT OF PHONEWALE)_VALSAD", code: "IN115188", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Fonebox Retail Pvt Ltd_Azad Chowk_Valsad", code: "IN034008", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Foneking_(Unit Of Poojara Telecom Pvt Ltd)_Shop No.09_Valsad 2", code: "IN117763", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Foneking_(Unit Of Poojara Telecom Pvt Ltd)_Shop No.1_Valsad 2", code: "IN117764", bm: "ASHISH DHANGAR", address: "" },
+      { name: "GAYTRI ELECTRONICS_PARDI_VALSAD_GUJARAT", code: "501004104", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Gujarat Mobile_Azad Chowk_Valsad", code: "IN012708", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Gujarat Mobile_Station Road_Valsad", code: "IN031907", bm: "ASHISH DHANGAR", address: "" },
+      { name: "JASMIN INFINITE TRADE PVT LTD_SOMA TALAV_VALSAD", code: "IN111625", bm: "ASHISH DHANGAR", address: "" },
+      { name: "JAY AMBE ELECTRONICS_PARDI_VALSAD_GUJARAT", code: "501004202", bm: "ASHISH DHANGAR", address: "" },
+      { name: "M.S.MOBILE_HALAR ROAD_VALSAD_GUJARAT", code: "501004103", bm: "ASHISH DHANGAR", address: "" },
+      { name: "MAA ASHAPURA TELECOM_STADIUM ROAD_VALSAD_GUJARAT", code: "501003030", bm: "ASHISH DHANGAR", address: "" },
+      { name: "MAMTA TELECOM_PARDI_VALSAD_GUJARAT", code: "501004194", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Mehta Retail Private Limited_Stadium Road_Valsad", code: "IN036720", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Mehta Retail Pvt Ltd_Pardi Char Rasta_Valsad", code: "IN024438", bm: "ASHISH DHANGAR", address: "" },
+      { name: "NEW SUPER MOBILE SHOP_BUS DEPOT_VALSAD_GUJARAT", code: "501004110", bm: "ASHISH DHANGAR", address: "" },
+      { name: "PHONE WALE_HALAR ROAD_VALSAD_GUJARAT", code: "501001347", bm: "ASHISH DHANGAR", address: "" },
+      { name: "PRATHAM TELECOM_UDWADA_VALSAD_GUJARAT", code: "501004099", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Phone Mart (Unit Of Mehta Retail Private Limited)_Samruddhi Apt_Valsad", code: "IN028429", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Phone World (Unit Of Phonewale Limited)_Stadium Road_Valsad", code: "IN037500", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Pocket Phone (Unit Of Mehta Retail Pvt Ltd)_Shahid Chowk_Valsad", code: "IN030731", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Poojara Telecom Pvt Ltd_Halar Road", code: "501003264", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Poojara Telecom Pvt Ltd_Valsad_Udwada", code: "IN016742", bm: "ASHISH DHANGAR", address: "" },
+      { name: "SANJAY SHOP_HALAR ROAD_VALSAD_GUJARAT", code: "501004114", bm: "ASHISH DHANGAR", address: "" },
+      { name: "SHREE ARIHANT MOBILE_PATLIYA ROAD_UDWADA_GUJARAT", code: "501004115", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Suvidha Electronics (Unit Of Poojara Telecom Pvt Ltd)_Killa Pardi_Valsad", code: "501004190", bm: "ASHISH DHANGAR", address: "" },
+      { name: "VIMAL TELECOM_PARDI_VALSAD_GUJARAT", code: "501004127", bm: "ASHISH DHANGAR", address: "" },
+    ]
+  },
+  "WILLIS PATEL": {
+    dealers: [
+      { name: "ARIHANT COMMUNICATION_PEOPLES CHAR RASTA KATARGAM_SURAT_GUJARAT", code: "501003589", bm: "JAY DABGAR", address: "" },
+      { name: "Asha Mobile Shop_Rampura_Surat", code: "501000556", bm: "JAY DABGAR", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD _  AMROLI SAYAN ROAD_SURAT_GUJARAT", code: "501004834", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_AMROLI_SURAT_GUJARAT", code: "501004785", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_M.S. VEDROAD_SURAT_GUJARAT", code: "501004802", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_SINGANPUR_SURAT_GUJARAT", code: "501004816", bm: "DHAVAL MALI", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_VED ROAD_SURAT_GUJARAT", code: "501004829", bm: "DHAVAL MALI", address: "" },
+      { name: "Balar Mobile_Dhanmora Road", code: "IN125846", bm: "JAY DABGAR", address: "" },
+      { name: "Bhatia Communications & Retail (India) Limited_Nanavat Main Road_Surat", code: "IN027074", bm: "DHAVAL MALI", address: "" },
+      { name: "Fonebox Retail Pvt Ltd (A Unit Of Phonewale)_Katargam", code: "501004732", bm: "JAY DABGAR", address: "" },
+      { name: "GUJARAT MOBILE WORLD_VED ROAD_SURAT_GUJARAT", code: "501004346", bm: "JAY DABGAR", address: "" },
+      { name: "GUJRAT MOBILE WORLD _  VEDROAD PANDOL SHOPPING_SURAT_GUJARAT", code: "501004344", bm: "JAY DABGAR", address: "" },
+      { name: "GUJRAT MOBILE WORLD_PEOPLES CHAR RASTA_SURAT_GUJARAT", code: "501000274", bm: "JAY DABGAR", address: "" },
+      { name: "Gujarat Mobile World_ Rughnathpura_Surat", code: "IN014667", bm: "JAY DABGAR", address: "" },
+      { name: "Gujarat Mobile World_Amroli (112)_Surat", code: "IN023899", bm: "JAY DABGAR", address: "" },
+      { name: "Gujarat Mobile_Amroli", code: "IN004933", bm: "JAY DABGAR", address: "" },
+      { name: "Gujarat Mobile_Vedroad_Surat", code: "IN019250", bm: "JAY DABGAR", address: "" },
+      { name: "Gujrat Mobile_Kosad Road_Surat", code: "IN034641", bm: "JAY DABGAR", address: "" },
+      { name: "HELLO MOBILE COLLECTION_RAMPURA_SURAT_GUJARAT", code: "501000557", bm: "JAY DABGAR", address: "" },
+      { name: "HELLO MOBILE_KATARGAM_SURAT", code: "IN114163", bm: "JAY DABGAR", address: "" },
+      { name: "Kuldevi  Mobile_Nagar Road_Surat", code: "IN010233", bm: "DHAVAL MALI", address: "" },
+      { name: "MAJISA MOBILE_VED ROAD_SURAT_GUJARAT", code: "501005331", bm: "DHAVAL MALI", address: "" },
+      { name: "MEHTA RETAIL PVT LTD_VED ROAD_SURAT", code: "IN032845", bm: "JAY DABGAR", address: "" },
+      { name: "My Mobile Zone_Katargam_Surat", code: "IN025368", bm: "DHAVAL MALI", address: "" },
+      { name: "NARMADA MARKETING_38 PANDOL_SURAT_GUJARAT", code: "501000296", bm: "JAY DABGAR", address: "" },
+      { name: "NEMI MOBILE_VED ROAD_SURAT_GUJARAT", code: "501000292", bm: "JAY DABGAR", address: "" },
+      { name: "NEW KHODIYAR MOBILE SHOP_KATARGAM_SURAT_GUJARAT", code: "501008860", bm: "JAY DABGAR", address: "" },
+      { name: "NEW KHODIYAR MOBILE SHOP_PEOPLES CHAR RASTA KATARGAM_SURAT_GUJARAT", code: "501000290", bm: "JAY DABGAR", address: "" },
+      { name: "Phone Plus (Unit Of Umiya Mobile Pvt Ltd)_Siddheshwar Society_Surat", code: "IN020680", bm: "DHAVAL MALI", address: "" },
+      { name: "Ramdev Mobile_Ved Road_Surat", code: "IN035887", bm: "DHAVAL MALI", address: "" },
+      { name: "SHIVAM MOBILE CARE (UNIT OF RAMDEV MOBILE)_AMROLI_SURAT", code: "IN034768", bm: "DHAVAL MALI", address: "" },
+      { name: "SHREE MAHADEV MOBILE_VED ROAD_SURAT_GUJARAT", code: "IN105352", bm: "DHAVAL MALI", address: "" },
+      { name: "VINIT MOBILE_AMROLI_SURAT_GUJARAT", code: "501001748", bm: "JAY DABGAR", address: "" },
+      { name: "Your Mobile (Unit Of Gujarat Mobile World)_ Royal Plaza_Surat", code: "IN027593", bm: "JAY DABGAR", address: "" },
+    ]
+  },
+  "YATIN MISTRY": {
+    dealers: [
+      { name: "16036  JAY JALARAM PVT LTD_KHERGAM_GUJARAT", code: "IN105116", bm: "ASHISH DHANGAR", address: "" },
+      { name: "A R TELECOM_DASHERA TEKARI_KHERGAM_GUJARAT", code: "501002270", bm: "ASHISH DHANGAR", address: "" },
+      { name: "ANERI MOBILE_VALSAD_GUJARAT", code: "501004172", bm: "ASHISH DHANGAR", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_STATON ROAD_VALSAD_GUJARAT", code: "501009015", bm: "ASHISH DHANGAR", address: "" },
+      { name: "BHATIA COM AND RETAIL IND PVT LTD_VALSAD_GUJARAT", code: "501004825", bm: "ASHISH DHANGAR", address: "" },
+      { name: "BHATIA COMM AND RETAILER IND PTV LTD_KHERGAM_NAVSARI", code: "IN124860", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Gujarat Mobile_Valsad Road_Khergham", code: "IN027459", bm: "ASHISH DHANGAR", address: "" },
+      { name: "JALARAM TELECOM_NAVA ROAD_KHERGAM", code: "IN122654", bm: "ASHISH DHANGAR", address: "" },
+      { name: "MAHALAXMI AGENCY CARE_SHUBHAM RESIDENCY_KHERGAM", code: "IN114022", bm: "ASHISH DHANGAR", address: "" },
+      { name: "MOBILE WORLD_BUS DEPOT_VALSAD_GUJARAT", code: "501004107", bm: "ASHISH DHANGAR", address: "" },
+      { name: "MOON MOON MOBILE_BAI AVA BAI ROAD_VALSAD_GUJARAT", code: "501004102", bm: "ASHISH DHANGAR", address: "" },
+      { name: "New Maha Balaji Mobile Sales & Service_Bdca Shopping Center_Valsad", code: "IN011783", bm: "ASHISH DHANGAR", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_DASERA TEKRI_KHERGAM", code: "IN118529", bm: "ASHISH DHANGAR", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_NEAR MASJID_KHERGAM", code: "IN119592", bm: "ASHISH DHANGAR", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_TITHAL ROAD_VALSAD (BM)", code: "IN119822", bm: "ASHISH DHANGAR", address: "" },
+      { name: "POOJARA TELECOM PVT LTD_TULSI ESTATE_DUNGRI", code: "IN122218", bm: "ASHISH DHANGAR", address: "" },
+      { name: "PREYA MOBILE SHOP_BAJAR ROAD_KHERGAM", code: "IN122646", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Poojara Telecom Pvt Ltd (CM)_Udipi Hotel", code: "IN005795", bm: "ASHISH DHANGAR", address: "" },
+      { name: "R V TELECOM SALES AND SERVICE_APMC MARKET_KHERGAM", code: "IN110389", bm: "ASHISH DHANGAR", address: "" },
+      { name: "RAJ ELECTRONICS_MG ROAD_VALSAD_GUJARAT", code: "501004113", bm: "ASHISH DHANGAR", address: "" },
+      { name: "RAMDEV MOBILE_DASHERA TEKARI_KHERGAM_GUJARAT", code: "501004165", bm: "ASHISH DHANGAR", address: "" },
+      { name: "SHREE RAM MOBILE_KUMBHARWAD_KHERGAM_GUJARAT", code: "501004192", bm: "ASHISH DHANGAR", address: "" },
+      { name: "SUVIDHA ELECTRONICS_CHIKHALI_KHERGAM_GUJARAT", code: "501009073", bm: "ASHISH DHANGAR", address: "" },
+      { name: "TAKSH ELECTRONICS_CHARRASTA_KHERGAM_GUJARAT", code: "501004191", bm: "ASHISH DHANGAR", address: "" },
+      { name: "UMIYA MOBILE PVT LTD_NAVJIVAN BULIDING_VALSAD", code: "IN125226", bm: "ASHISH DHANGAR", address: "" },
+      { name: "Your Mobile(Unit Of Gujarat Mobile)_Center Stadium Road_Valsad", code: "IN028497", bm: "ASHISH DHANGAR", address: "" },
+    ]
+  },
+};
+// ═══════════════════════════════════════════════════════
+//  END OF YOUR DATA
+// ═══════════════════════════════════════════════════════
+
+let selImg = null, selDealer = null;
+
+// Init: populate salesman dropdown
+(function(){
+  const s = document.getElementById('selSales');
+  Object.keys(DATA).sort().forEach(n => {
+    const o = document.createElement('option');
+    o.value = o.textContent = n;
+    s.appendChild(o);
+  });
+})();
+
+function onSalesChange() {
+  const name = document.getElementById('selSales').value;
+
+  resetDealer();
+  showBMPlaceholder();
+  document.getElementById('selDealer').disabled = true;
+  document.getElementById('selDealer').innerHTML = '<option value="">— Select dealer —</option>';
+
+  if (!name) {
+    setStep(1); checkReady(); return;
+  }
+
+  const row = DATA[name];
+  const ds = document.getElementById('selDealer');
+  row.dealers.forEach(d => {
+    const o = document.createElement('option');
+    o.value = d.code;
+    o.textContent = d.name;
+    o.dataset.code = d.code;
+    o.dataset.name = d.name;
+    o.dataset.bm = d.bm || '';
+    o.dataset.addr = d.address || '';
+    ds.appendChild(o);
+  });
+  ds.disabled = false;
+
+  setStep(2); checkReady();
+}
+
+function onBMChange() { checkReady(); }   // for future multi-BM support
+
+function onDealerChange() {
+  resetDealer();
+  const sel = document.getElementById('selDealer');
+  const opt = sel.options[sel.selectedIndex];
+  if (!sel.value) { showBMPlaceholder(); checkReady(); return; }
+
+  selDealer = {
+    name: opt.dataset.name,
+    code: opt.dataset.code,
+    bm: opt.dataset.bm || '',
+    address: opt.dataset.addr
+  };
+
+  document.getElementById('bmPlaceholder').style.display = 'none';
+  document.getElementById('selBM').style.display = 'none';
+  document.getElementById('bmBox').style.display = 'flex';
+  document.getElementById('bmName').textContent = selDealer.bm || '—';
+
+  document.getElementById('showCode').textContent = selDealer.code;
+  document.getElementById('codeWrap').style.display = 'block';
+
+  setStep(3); checkReady();
+}
+
+function resetDealer() {
+  selDealer = null;
+  document.getElementById('codeWrap').style.display = 'none';
+  document.getElementById('showCode').textContent = '—';
+}
+
+function showBMPlaceholder() {
+  document.getElementById('bmBox').style.display = 'none';
+  document.getElementById('selBM').style.display = 'none';
+  document.getElementById('bmPlaceholder').style.display = 'block';
+}
+
+function onImg(e) {
+  const f = e.target.files[0]; if (!f) return;
+  if (f.size > 10 * 1024 * 1024) { toast('Image must be under 10MB', 'err'); return; }
+  selImg = f;
+  const r = new FileReader();
+  r.onload = ev => {
+    document.getElementById('imgPrev').src = ev.target.result;
+    document.getElementById('prevWrap').style.display = 'block';
+    document.getElementById('uZone').style.display = 'none';
+  };
+  r.readAsDataURL(f);
+  setStep(4); checkReady();
+}
+
+function removeImg() {
+  selImg = null;
+  document.getElementById('imgInput').value = '';
+  document.getElementById('prevWrap').style.display = 'none';
+  document.getElementById('uZone').style.display = 'block';
+  checkReady();
+}
+
+function setStep(n) {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('ps' + i);
+    if (!el) continue;
+    el.className = 'p-seg ' + (i < n ? 'done' : i === n ? 'active' : '');
+  }
+}
+
+function checkReady() {
+  const salesOk  = !!document.getElementById('selSales').value;
+  const bmOk     = !!selDealer && !!selDealer.bm;
+  const dealerOk = !!selDealer;
+  const imgOk    = !!selImg;
+  const ok = salesOk && bmOk && dealerOk && imgOk;
+
+  document.getElementById('btnSub').disabled = !ok;
+  document.getElementById('hint').style.display = ok ? 'none' : 'block';
+
+  let msg = '';
+  if (!salesOk)  msg = 'Select your salesman name';
+  else if (!bmOk) msg = 'BM will auto-fill when you select a dealer';
+  else if (!dealerOk) msg = 'Select a dealer';
+  else if (!imgOk)    msg = 'Upload a visit photo';
+  document.getElementById('hint').textContent = msg;
+}
+
+// ── SUBMIT ────────────────────────────────────────────
+async function submitForm() {
+  const salesName = document.getElementById('selSales').value;
+  const bmName    = selDealer.bm;
+
+  // Double-check dealer code exists
+  if (!selDealer || !selDealer.code) {
+    toast('Error: dealer code missing. Please reselect dealer.', 'err'); return;
+  }
+
+  setLoading(true);
+  try {
+    const base64   = await toB64(selImg);   // compressed JPEG
+    const ts       = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+    const fileName = `${selDealer.code}_${Date.now()}.jpg`;
+
+    const payload = {
+      timestamp:    ts,
+      salesmanName: salesName,
+      bmName:       bmName,
+      dealerName:   selDealer.name,
+      dealerCode:   selDealer.code,
+      dealerAddress:selDealer.address,
+      imageBase64:  base64,
+      imageName:    fileName,
+      mimeType:     'image/jpeg',
+    };
+
+    const res  = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+    const json = await res.json();
+
+    if (json.status === 'ok') {
+      showSuccess({ salesName, bmName, dealerName: selDealer.name, dealerCode: selDealer.code, ts });
+    } else {
+      throw new Error(json.message || 'Server error');
+    }
+  } catch (err) {
+    toast('❌ ' + err.message, 'err');
+    setLoading(false);
+  }
+}
+
+// ── IMAGE COMPRESSION ── resize to max 1200px & quality 0.75 before upload
+function toB64(file) {
+  return new Promise((ok, fail) => {
+    const reader = new FileReader();
+    reader.onerror = () => fail(new Error('Could not read image'));
+    reader.onload = ev => {
+      const img = new Image();
+      img.onerror = () => fail(new Error('Could not load image'));
+      img.onload = () => {
+        const MAX = 1200;
+        let w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+          else       { w = Math.round(w * MAX / h); h = MAX; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        // Use JPEG at 0.78 quality — good balance of size vs clarity
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.78);
+        ok(dataUrl.split(',')[1]);
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function setLoading(on) {
+  document.getElementById('btnSub').disabled = on;
+  document.getElementById('btnTxt').textContent = on ? 'Submitting…' : 'Submit Visit';
+  document.getElementById('btnSpin').style.display = on ? 'inline-block' : 'none';
+}
+
+function showSuccess(d) {
+  document.getElementById('frmWrap').style.display = 'none';
+  document.getElementById('scr').classList.add('on');
+  document.getElementById('scTable').innerHTML = `
+    <div class="sc-row"><span class="k">Salesman</span><span class="v">${d.salesName}</span></div>
+    <div class="sc-row"><span class="k">BM</span><span class="v">${d.bmName}</span></div>
+    <div class="sc-row"><span class="k">Dealer</span><span class="v">${d.dealerName}</span></div>
+    <div class="sc-row"><span class="k">Dealer Code</span><span class="v code">${d.dealerCode}</span></div>
+    <div class="sc-row"><span class="k">Time</span><span class="v">${d.ts}</span></div>
+  `;
+}
+
+function resetForm() {
+  document.getElementById('frmWrap').style.display = 'block';
+  document.getElementById('scr').classList.remove('on');
+  document.getElementById('selSales').value = '';
+  document.getElementById('selDealer').innerHTML = '<option value="">— Select dealer —</option>';
+  document.getElementById('selDealer').disabled = true;
+  showBMPlaceholder();
+  resetDealer();
+  removeImg();
+  selImg = null;
+  setLoading(false);
+  setStep(1);
+  checkReady();
+}
+
+function toast(msg, type = 'ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// Drag & drop support
+const z = document.getElementById('uZone');
+z.addEventListener('dragover',  e => { e.preventDefault(); z.classList.add('drag'); });
+z.addEventListener('dragleave', ()  => z.classList.remove('drag'));
+z.addEventListener('drop', e => {
+  e.preventDefault(); z.classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) {
+    const dt = new DataTransfer(); dt.items.add(f);
+    document.getElementById('imgInput').files = dt.files;
+    onImg({ target: { files: [f] } });
+  }
+});
+</script>
+</body>
+</html>
