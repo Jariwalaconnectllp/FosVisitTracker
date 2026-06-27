@@ -39,26 +39,26 @@
   .card {
     background: #fff;
     border-radius: 24px;
-    box-shadow: 0 32px 80px rgba(0,0,0,.28);
+    box-shadow: 0 32px 80px rgb(93, 233, 58);
     width: 100%; max-width: 460px;
     overflow: hidden;
   }
 
   /* ── HEADER ── */
   .hdr {
-    background: linear-gradient(135deg, #0f2851, #1d4ed8);
+    background: linear-gradient(135deg, #794c76, #e9cbec);
     padding: 26px 28px 22px;
-    color: #fff;
+    color: #fcf160;
   }
   .hdr-row { display: flex; align-items: center; gap: 14px; }
   .hdr-icon {
-    width: 46px; height: 46px; border-radius: 13px;
-    background: rgba(255,255,255,.15);
+    width: 60px; height: 60px; border-radius: 13px;
+    background: rgba(225, 243, 223, 0.815);
     display: flex; align-items: center; justify-content: center;
-    font-size: 22px; flex-shrink: 0;
+    font-size: 60px; flex-shrink: 0;
   }
   .hdr h1 { font-size: 19px; font-weight: 800; letter-spacing: -.3px; }
-  .hdr p  { font-size: 12px; color: rgba(255,255,255,.65); margin-top: 2px; }
+  .hdr p  { font-size: 12px; color: rgba(153, 192, 170, 0.76); margin-top: 2px; }
 
   /* progress bar */
   .progress { display: flex; gap: 5px; margin-top: 18px; }
@@ -278,8 +278,9 @@
 
     <div class="hdr">
       <div class="hdr-row">
-        <div class="hdr-icon">🏪</div>
+        <div class="hdr-icon"><img src="D:\sam1\New folder\JCL_logo.png" alt="Jariwala Connect LLP" width="50" height="50"></div>
         <div>
+          <h1>Jariwala Connect LLP</h1>
           <h1>FOS Visit Tracker</h1>
           <p>Log your outlet visit in seconds</p>
         </div>
@@ -305,8 +306,24 @@
 
       <hr/>
 
-      <!-- STEP 2 — BM -->
-      <div class="step-tag">Step 2 · Business Manager</div>
+
+      <!-- STEP 2 — Dealer -->
+      <div class="step-tag">Step 2 · Select Dealer</div>
+      <div class="field">
+        <label>Dealer Name <span class="req">*</span></label>
+        <select id="selDealer" onchange="onDealerChange()" disabled>
+          <option value="">— Select dealer —</option>
+        </select>
+      </div>
+      <!-- Dealer Code display (shown after dealer selected) -->
+      <div id="codeWrap" style="display:none; margin-top:-8px; margin-bottom:16px;">
+        <div class="code-badge">🏷️ Dealer Code: <span id="showCode">—</span></div>
+      </div>
+
+      <hr/>      
+
+      <!-- STEP 3 — BM -->
+      <div class="step-tag">Step 3 · Business Manager</div>
       <div class="field">
         <label>BM Name <span class="req">*</span></label>
         <div id="bmBox" class="auto-box" style="display:none">
@@ -320,24 +337,10 @@
           Auto-filled after selecting dealer
         </div>
       </div>
-
       <hr/>
 
-      <!-- STEP 3 — Dealer -->
-      <div class="step-tag">Step 3 · Select Dealer</div>
-      <div class="field">
-        <label>Dealer Name <span class="req">*</span></label>
-        <select id="selDealer" onchange="onDealerChange()" disabled>
-          <option value="">— Select dealer —</option>
-        </select>
-      </div>
 
-      <!-- Dealer Code display (shown after dealer selected) -->
-      <div id="codeWrap" style="display:none; margin-top:-8px; margin-bottom:16px;">
-        <div class="code-badge">🏷️ Dealer Code: <span id="showCode">—</span></div>
-      </div>
 
-      <hr/>
 
       <!-- STEP 4 — Photo -->
       <div class="step-tag">Step 4 · Outlet Photo</div>
