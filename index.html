@@ -295,9 +295,41 @@
 
     <div class="body">
 
+      <!-- BRAND SELECTOR -->
+      <div class="step-tag">Step 0 · Select Brand</div>
+      <div class="brand-wrap">
+        <button class="brand-btn" id="btnOppo" onclick="onBrandSelect('OPPO')">
+          <span class="b-check">✓</span>
+          <div class="b-svg">
+            <svg viewBox="0 0 120 36" xmlns="http://www.w3.org/2000/svg">
+            <text x="60" y="27" text-anchor="middle"
+              font-family="Arial Rounded MT Bold,Arial,sans-serif"
+              font-size="28" font-weight="900" letter-spacing="2"
+              fill="#1EA366">oppo</text>
+          </svg>
+          </div>
+          <span class="b-tag">Select Brand</span>
+        </button>
+        <button class="brand-btn" id="btnRealme" onclick="onBrandSelect('REALME')">
+          <span class="b-check">✓</span>
+          <div class="b-svg">
+            <svg viewBox="0 0 140 36" xmlns="http://www.w3.org/2000/svg">
+            <text x="70" y="27" text-anchor="middle"
+              font-family="Arial Rounded MT Bold,Arial,sans-serif"
+              font-size="24" font-weight="900" letter-spacing="1"
+              font-style="italic"
+              fill="#111111">realme</text>
+          </svg>
+          </div>
+          <span class="b-tag">Select Brand</span>
+        </button>
+      </div>
+
+      <hr/>
+
       <!-- STEP 1 — Salesman -->
-      <div class="step-tag">Step 1 · Who are you?</div>
-      <div class="field">
+      <div class="step-tag" id="step1tag" style="display:none">Step 1 · Who are you?</div>
+      <div class="field" id="step1field" style="display:none">
         <label>Salesman Name <span class="req">*</span></label>
         <select id="selSales" onchange="onSalesChange()">
           <option value="">— Select your name —</option>
@@ -1273,17 +1305,49 @@ const DATA = {
 //  END OF YOUR DATA
 // ═══════════════════════════════════════════════════════
 
-let selImg = null, selDealer = null;
 
-// Init: populate salesman dropdown
-(function(){
+// ── BRAND MAPPING ──────────────────────────────────────────────────────────
+const BRAND = {};
+Object.keys(DATA).forEach(name => {
+  BRAND[name] = ['AKASH','DHIRAJ','HARDIK','PIYUSH','SUBHAM'].includes(name) ? 'REALME' : 'OPPO';
+});
+
+let selImg = null, selDealer = null, selBrand = null;
+
+// Init — nothing auto-populated; brand must be selected first
+(function(){ /* brand buttons handle population */ })();
+
+function onBrandSelect(brand) {
+  selBrand = brand;
+
+  // update button styles
+  document.getElementById('btnOppo').className   = 'brand-btn' + (brand === 'OPPO'   ? ' active-oppo'   : '');
+  document.getElementById('btnRealme').className = 'brand-btn' + (brand === 'REALME' ? ' active-realme' : '');
+  // update tag text
+  document.querySelectorAll('.b-tag').forEach(t => t.textContent = 'Select Brand');
+  const btnId = brand === 'OPPO' ? 'btnOppo' : 'btnRealme';
+  document.querySelector('#' + btnId + ' .b-tag').textContent = 'Selected ✓';
+
+  // show step 1
+  document.getElementById('step1tag').style.display   = '';
+  document.getElementById('step1field').style.display = '';
+
+  // reset downstream
   const s = document.getElementById('selSales');
-  Object.keys(DATA).sort().forEach(n => {
+  s.innerHTML = '<option value="">— Select your name —</option>';
+  Object.keys(DATA).sort().filter(n => BRAND[n] === brand).forEach(n => {
     const o = document.createElement('option');
     o.value = o.textContent = n;
     s.appendChild(o);
   });
-})();
+
+  // reset rest of form
+  document.getElementById('selDealer').innerHTML = '<option value="">— Select dealer —</option>';
+  document.getElementById('selDealer').disabled = true;
+  showBMPlaceholder();
+  resetDealer();
+  setStep(1); checkReady();
+}
 
 function onSalesChange() {
   const name = document.getElementById('selSales').value;
@@ -1383,17 +1447,19 @@ function setStep(n) {
 }
 
 function checkReady() {
+  const brandOk  = !!selBrand;
   const salesOk  = !!document.getElementById('selSales').value;
   const bmOk     = !!selDealer && !!selDealer.bm;
   const dealerOk = !!selDealer;
   const imgOk    = !!selImg;
-  const ok = salesOk && bmOk && dealerOk && imgOk;
+  const ok = brandOk && salesOk && bmOk && dealerOk && imgOk;
 
   document.getElementById('btnSub').disabled = !ok;
   document.getElementById('hint').style.display = ok ? 'none' : 'block';
 
   let msg = '';
-  if (!salesOk)  msg = 'Select your salesman name';
+  if (!brandOk)  msg = 'Select a brand first (OPPO or REALME)';
+  else if (!salesOk)  msg = 'Select your salesman name';
   else if (!bmOk) msg = 'BM will auto-fill when you select a dealer';
   else if (!dealerOk) msg = 'Select a dealer';
   else if (!imgOk)    msg = 'Upload a visit photo';
@@ -1426,13 +1492,14 @@ async function submitForm() {
       imageBase64:  base64,
       imageName:    fileName,
       mimeType:     'image/jpeg',
+      brand:        selBrand,
     };
 
     const res  = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
     const json = await res.json();
 
     if (json.status === 'ok') {
-      showSuccess({ salesName, bmName, dealerName: selDealer.name, dealerCode: selDealer.code, ts });
+      showSuccess({ salesName, bmName, dealerName: selDealer.name, dealerCode: selDealer.code, ts, brand: selBrand });
     } else {
       throw new Error(json.message || 'Server error');
     }
@@ -1480,6 +1547,7 @@ function showSuccess(d) {
   document.getElementById('frmWrap').style.display = 'none';
   document.getElementById('scr').classList.add('on');
   document.getElementById('scTable').innerHTML = `
+    <div class="sc-row"><span class="k">Brand</span><span class="v">${d.brand}</span></div>
     <div class="sc-row"><span class="k">Salesman</span><span class="v">${d.salesName}</span></div>
     <div class="sc-row"><span class="k">BM</span><span class="v">${d.bmName}</span></div>
     <div class="sc-row"><span class="k">Dealer</span><span class="v">${d.dealerName}</span></div>
@@ -1491,6 +1559,11 @@ function showSuccess(d) {
 function resetForm() {
   document.getElementById('frmWrap').style.display = 'block';
   document.getElementById('scr').classList.remove('on');
+  selBrand = null;
+  document.getElementById('btnOppo').className   = 'brand-btn';
+  document.getElementById('btnRealme').className = 'brand-btn';
+  document.getElementById('step1tag').style.display   = 'none';
+  document.getElementById('step1field').style.display = 'none';
   document.getElementById('selSales').value = '';
   document.getElementById('selDealer').innerHTML = '<option value="">— Select dealer —</option>';
   document.getElementById('selDealer').disabled = true;
