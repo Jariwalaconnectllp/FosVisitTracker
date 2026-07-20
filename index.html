@@ -295,36 +295,27 @@
 
     <div class="body">
 
-      <!-- BRAND SELECTOR -->
-      <div class="step-tag">Step 0 · Select Brand</div>
+      <!-- ── BRAND SELECTOR ── -->
+      <div class="step-tag">Select Brand</div>
       <div class="brand-wrap">
-        <button class="brand-btn" id="btnOppo" onclick="onBrandSelect('OPPO')">
-          <span class="b-check">✓</span>
-          <div class="b-svg">
-            <svg viewBox="0 0 120 36" xmlns="http://www.w3.org/2000/svg">
-            <text x="60" y="27" text-anchor="middle"
-              font-family="Arial Rounded MT Bold,Arial,sans-serif"
-              font-size="28" font-weight="900" letter-spacing="2"
-              fill="#1EA366">OPPO</text>
-          </svg>
-          </div>
-          <span class="b-tag">Select Brand</span>
-        </button>
-        <button class="brand-btn" id="btnRealme" onclick="onBrandSelect('REALME')">
-          <span class="b-check">✓</span>
-          <div class="b-svg">
-            <svg viewBox="0 0 140 36" xmlns="http://www.w3.org/2000/svg">
-            <text x="70" y="27" text-anchor="middle"
-              font-family="Arial Rounded MT Bold,Arial,sans-serif"
-              font-size="24" font-weight="900" letter-spacing="1"
-              font-style="italic"
-              fill="#111111">REALME</text>
-          </svg>
-          </div>
-          <span class="b-tag">Select Brand</span>
-        </button>
-      </div>
 
+        <button class="brand-btn" id="btnOppo" onclick="onBrandSelect('OPPO')" title="OPPO">
+          <span class="b-check">&#10003;</span>
+          <div class="b-logo-wrap">
+            <img src="oppo logo.png" alt="OPPO" style="max-width:110px;width:100%;height:auto;object-fit:contain;display:block;">
+          </div>
+          <span class="b-tag">Tap to select</span>
+        </button>
+
+        <button class="brand-btn" id="btnRealme" onclick="onBrandSelect('REALME')" title="realme">
+          <span class="b-check">&#10003;</span>
+          <div class="b-logo-wrap">
+            <img src="realme logo.png" alt="realme" style="max-width:110px;width:100%;height:auto;object-fit:contain;display:block;">
+          </div>
+          <span class="b-tag">Tap to select</span>
+        </button>
+
+      </div>
       <hr/>
 
       <!-- STEP 1 — Salesman -->
@@ -1306,47 +1297,37 @@ const DATA = {
 // ═══════════════════════════════════════════════════════
 
 
-// ── BRAND MAPPING ──────────────────────────────────────────────────────────
+// ── Brand mapping: REALME = new 5 salesmen, OPPO = all others ──
+const REALME_LIST = ['AKASH', 'DHIRAJ', 'HARDIK', 'PIYUSH', 'SUBHAM'];
 const BRAND = {};
-Object.keys(DATA).forEach(name => {
-  BRAND[name] = ['AKASH','DHIRAJ','HARDIK','PIYUSH','SUBHAM'].includes(name) ? 'REALME' : 'OPPO';
-});
+Object.keys(DATA).forEach(n => { BRAND[n] = REALME_LIST.includes(n) ? 'REALME' : 'OPPO'; });
 
 let selImg = null, selDealer = null, selBrand = null;
 
-// Init — nothing auto-populated; brand must be selected first
-(function(){ /* brand buttons handle population */ })();
+
+// Init handled by brand selection
+(function(){})();
 
 function onBrandSelect(brand) {
   selBrand = brand;
-
-  // update button styles
-  document.getElementById('btnOppo').className   = 'brand-btn' + (brand === 'OPPO'   ? ' active-oppo'   : '');
-  document.getElementById('btnRealme').className = 'brand-btn' + (brand === 'REALME' ? ' active-realme' : '');
-  // update tag text
-  document.querySelectorAll('.b-tag').forEach(t => t.textContent = 'Select Brand');
-  const btnId = brand === 'OPPO' ? 'btnOppo' : 'btnRealme';
-  document.querySelector('#' + btnId + ' .b-tag').textContent = 'Selected ✓';
-
+  document.getElementById('btnOppo').className   = 'brand-btn' + (brand==='OPPO'   ? ' active-oppo'   : '');
+  document.getElementById('btnRealme').className = 'brand-btn' + (brand==='REALME' ? ' active-realme' : '');
+  document.querySelectorAll('.b-tag').forEach(t => t.textContent = 'Tap to select');
+  const activeBtn = brand==='OPPO' ? 'btnOppo' : 'btnRealme';
+  document.getElementById(activeBtn).querySelector('.b-tag').textContent = 'Selected';
   // show step 1
-  document.getElementById('step1tag').style.display   = '';
+  document.getElementById('step1tag').style.display  = '';
   document.getElementById('step1field').style.display = '';
-
-  // reset downstream
+  // repopulate salesman list filtered by brand
   const s = document.getElementById('selSales');
   s.innerHTML = '<option value="">— Select your name —</option>';
-  Object.keys(DATA).sort().filter(n => BRAND[n] === brand).forEach(n => {
-    const o = document.createElement('option');
-    o.value = o.textContent = n;
-    s.appendChild(o);
+  Object.keys(DATA).sort().filter(n => BRAND[n]===brand).forEach(n => {
+    const o = document.createElement('option'); o.value = o.textContent = n; s.appendChild(o);
   });
-
-  // reset rest of form
+  // reset downstream
   document.getElementById('selDealer').innerHTML = '<option value="">— Select dealer —</option>';
   document.getElementById('selDealer').disabled = true;
-  showBMPlaceholder();
-  resetDealer();
-  setStep(1); checkReady();
+  showBMPlaceholder(); resetDealer(); setStep(1); checkReady();
 }
 
 function onSalesChange() {
@@ -1562,7 +1543,8 @@ function resetForm() {
   selBrand = null;
   document.getElementById('btnOppo').className   = 'brand-btn';
   document.getElementById('btnRealme').className = 'brand-btn';
-  document.getElementById('step1tag').style.display   = 'none';
+  document.querySelectorAll('.b-tag').forEach(t => t.textContent = 'Tap to select');
+  document.getElementById('step1tag').style.display  = 'none';
   document.getElementById('step1field').style.display = 'none';
   document.getElementById('selSales').value = '';
   document.getElementById('selDealer').innerHTML = '<option value="">— Select dealer —</option>';
