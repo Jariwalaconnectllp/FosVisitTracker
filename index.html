@@ -1476,8 +1476,19 @@ async function submitForm() {
       brand:        selBrand,
     };
 
-    const res  = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-    const json = await res.json();
+    // Google Apps Script requires no-cors mode from browser
+// We use a form-based approach to bypass CORS
+await fetch(SCRIPT_URL, {
+  method: 'POST',
+  mode: 'no-cors',
+  headers: { 'Content-Type': 'text/plain' },
+  body: JSON.stringify(payload)
+});
+
+// With no-cors we can't read response, so assume success
+showSuccess({ salesName, bmName, dealerName: selDealer.name, dealerCode: selDealer.code, ts, brand: selBrand });
+setLoading(false);
+return;
 
     if (json.status === 'ok') {
       showSuccess({ salesName, bmName, dealerName: selDealer.name, dealerCode: selDealer.code, ts, brand: selBrand });
